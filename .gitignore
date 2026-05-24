@@ -1,0 +1,18 @@
+# Mengabaikan folder dependency Node.js
+**/node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Mengabaikan environment virtual Python dan cache
+**/venv/
+**/.env
+**/__pycache__/
+**/.pytest_cache/
+
+# Mengabaikan file log dan OS sampah
+**/.DS_Store
+**/Thumbs.db
+
+# JAGA-JAGA: Jika nanti lu pakai ONNX, file .keras lama jangan di-upload biar repo ringan
+**/staypath_ai_best.keras
+**/staypath_ai.keras

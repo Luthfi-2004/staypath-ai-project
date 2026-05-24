@@ -1,0 +1,53 @@
+{
+  "target_name": "attrition_risk",
+  "positive_label": "High",
+  "numeric_cols": [
+    "years_experience",
+    "team_size",
+    "salary_usd_k",
+    "ai_tools_used_per_day",
+    "hours_with_ai_assistance_daily",
+    "ai_replaces_my_tasks_pct",
+    "weekly_ai_upskilling_hrs",
+    "productivity_score",
+    "burnout_score",
+    "job_satisfaction_1_5"
+  ],
+  "categorical_cols": [
+    "job_role",
+    "education_level",
+    "country",
+    "industry",
+    "company_size",
+    "remote_work_type",
+    "primary_ai_tool",
+    "ai_adoption_stage",
+    "fear_of_ai_replacement"
+  ],
+  "num_medians": {
+    "years_experience": 10.0,
+    "team_size": 25.0,
+    "salary_usd_k": 136.5,
+    "ai_tools_used_per_day": 4.0,
+    "hours_with_ai_assistance_daily": 4.3,
+    "ai_replaces_my_tasks_pct": 40.0,
+    "weekly_ai_upskilling_hrs": 5.1,
+    "productivity_score": 58.0,
+    "burnout_score": 50.0,
+    "job_satisfaction_1_5": 3.3
+  },
+  "cat_modes": {
+    "job_role": "AI Ethics Officer",
+    "education_level": "Master",
+    "country": "France",
+    "industry": "Gaming",
+    "company_size": "Enterprise (5000+)",
+    "remote_work_type": "Hybrid",
+    "primary_ai_tool": "Midjourney",
+    "ai_adoption_stage": "Integrating",
+    "fear_of_ai_replacement": "Medium"
+  },
+  "batch_size": 32,
+  "best_threshold": 0.5900000000000002,
+  "seed": 42
+}
