@@ -23,8 +23,13 @@ app.use('/api/pulse',      pulseRoutes);
 app.use('/api/dashboard',  dashboardRoutes);
 // app.use('/api/ai',      aiRoutes);
 
-// ── Start ──────────────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-  console.log(`Server berjalan di http://localhost:${PORT}`);
-});
+// ── Start (Diubah untuk Vercel Serverless) ─────────────────────────────────────
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5001;
+  app.listen(PORT, () => {
+    console.log(`Server berjalan di http://localhost:${PORT}`);
+  });
+}
+
+// WAJIB ADA: Export app untuk Vercel
+module.exports = app;
