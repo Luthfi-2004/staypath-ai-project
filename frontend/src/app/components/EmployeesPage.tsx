@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, Plus, Pencil, Trash2, X, AlertCircle, ChevronUp, ChevronDown } from "lucide-react";
+import { Search, Plus, Pencil, Trash2, X, AlertCircle, ChevronUp, ChevronDown, Eye, EyeOff } from "lucide-react";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -7,38 +7,43 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Status = "Aktif" | "Cuti" | "Nonaktif" | string;
+type Status   = "Aktif" | "Cuti" | "Nonaktif" | string;
+type AuthRole = "karyawan" | "hrd";
 
 interface EmployeeRecord {
-  id: number;
+  id:         number;
   employeeId: string;
-  name: string;
+  name:       string;
   department: string;
-  role: string;
-  email: string;
-  phone: string;
-  status: Status;
-  joinDate: string;
+  role:       string;
+  email:      string;
+  phone:      string;
+  status:     Status;
+  joinDate:   string;
+  authRole:   AuthRole;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const STATUSES: Status[] = ["Aktif", "Cuti", "Nonaktif"];
-
-// Tambahkan array DEPARTMENTS ini:
 const DEPARTMENTS = [
-  "Engineering", 
-  "Human Resources", 
-  "Finance", 
-  "Marketing", 
-  "Sales", 
-  "Operations"
+  "Engineering", "Product", "Design", "Marketing", "Sales",
+  "Analytics", "Finance", "Human Resources", "Operations",
 ];
+
+const STATUSES:   Status[]   = ["Aktif", "Cuti", "Nonaktif"];
+const AUTH_ROLES: AuthRole[] = ["karyawan", "hrd"];
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getInitials(name: string) {
   if (!name) return "??";
   return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+}
+
+function resolveJoinDate(emp: any): string {
+  if (emp.join_date)  return emp.join_date;
+  if (emp.created_at) return emp.created_at.split("T")[0];
+  return new Date().toISOString().split("T")[0];
 }
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -48,7 +53,6 @@ const statusStyle: Record<string, string> = {
   Cuti:     "bg-amber-50 text-amber-600 border border-amber-100",
   Nonaktif: "bg-gray-100 text-gray-400 border border-gray-200",
 };
-
 const statusDot: Record<string, string> = {
   Aktif:    "bg-emerald-500",
   Cuti:     "bg-amber-400",
@@ -66,14 +70,27 @@ function StatusBadge({ status }: { status: Status }) {
   );
 }
 
+// ─── Auth role badge ──────────────────────────────────────────────────────────
+
+function AuthRoleBadge({ role }: { role: AuthRole }) {
+  return (
+    <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-md font-medium ${
+      role === "hrd"
+        ? "bg-violet-50 text-violet-600 border border-violet-100"
+        : "bg-gray-50 text-gray-500 border border-gray-100"
+    }`}>
+      {role === "hrd" ? "HRD" : "Karyawan"}
+    </span>
+  );
+}
+
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
 const avatarColors = [
   "bg-blue-100 text-blue-700", "bg-violet-100 text-violet-700",
-  "bg-rose-100 text-rose-600", "bg-emerald-100 text-emerald-700",
-  "bg-amber-100 text-amber-700", "bg-cyan-100 text-cyan-700",
+  "bg-rose-100 text-rose-600",  "bg-emerald-100 text-emerald-700",
+  "bg-amber-100 text-amber-700","bg-cyan-100 text-cyan-700",
 ];
-
 function Avatar({ name, index }: { name: string; index: number }) {
   const color = avatarColors[index % avatarColors.length];
   return (
@@ -83,34 +100,40 @@ function Avatar({ name, index }: { name: string; index: number }) {
   );
 }
 
-// ─── Form ─────────────────────────────────────────────────────────────────────
+// ─── Form state ───────────────────────────────────────────────────────────────
 
 const emptyForm = {
-  name: "", department: DEPARTMENTS[0], role: "",
-  email: "", phone: "", status: "Aktif" as Status, joinDate: "",
+  name:      "",
+  department: DEPARTMENTS[0],
+  role:      "",
+  email:     "",
+  phone:     "",
+  status:    "Aktif" as Status,
+  joinDate:  "",
+  authRole:  "karyawan" as AuthRole,
+  password:  "",
 };
 
 type FormState  = typeof emptyForm;
 type FormErrors = Partial<Record<keyof FormState, string>>;
 
-function validate(f: FormState): FormErrors {
+function validate(f: FormState, mode: "add" | "edit"): FormErrors {
   const errors: FormErrors = {};
-  if (!f.name.trim()) errors.name = "Nama wajib diisi.";
-  if (!f.role.trim()) errors.role = "Role wajib diisi.";
+  if (!f.name.trim())  errors.name  = "Nama wajib diisi.";
+  if (!f.role.trim())  errors.role  = "Jabatan wajib diisi.";
   if (!f.email.trim()) {
     errors.email = "Email wajib diisi.";
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) {
     errors.email = "Format email tidak valid.";
   }
-  if (!f.joinDate) errors.joinDate = "Tanggal bergabung wajib diisi.";
+  if (!f.joinDate)     errors.joinDate = "Tanggal bergabung wajib diisi.";
+  if (mode === "add" && !f.password.trim()) errors.password = "Password awal wajib diisi.";
   return errors;
 }
 
-// ─── Field component ──────────────────────────────────────────────────────────
+// ─── Field ────────────────────────────────────────────────────────────────────
 
-function Field({
-  label, required, error, children,
-}: {
+function Field({ label, required, error, children }: {
   label: string; required?: boolean; error?: string; children: React.ReactNode;
 }) {
   return (
@@ -130,21 +153,19 @@ function Field({
 
 const inputCls = (err?: string) =>
   `w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 transition text-gray-700 bg-white ${
-    err
-      ? "border-red-300 focus:ring-red-100 focus:border-red-400"
-      : "border-gray-200 focus:ring-blue-100 focus:border-blue-400"
+    err ? "border-red-300 focus:ring-red-100 focus:border-red-400"
+        : "border-gray-200 focus:ring-blue-100 focus:border-blue-400"
   }`;
 
-// ─── Modal wrapper ────────────────────────────────────────────────────────────
+// ─── Modal ────────────────────────────────────────────────────────────────────
 
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode; }) {
+function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   const backdropRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
   }, [onClose]);
-
   return (
     <div
       ref={backdropRef}
@@ -154,10 +175,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h2 className="text-gray-900 font-semibold text-sm">{title}</h2>
-          <button
-            onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-          >
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
             <X size={15} />
           </button>
         </div>
@@ -169,14 +187,13 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 
 // ─── Employee form ────────────────────────────────────────────────────────────
 
-function EmployeeForm({
-  initial, employeeId, onSave, onClose, mode,
-}: {
+function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
   initial: FormState; employeeId?: string;
   onSave: (data: FormState) => void; onClose: () => void; mode: "add" | "edit";
 }) {
-  const [form, setForm]     = useState<FormState>(initial);
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [form, setForm]         = useState<FormState>(initial);
+  const [errors, setErrors]     = useState<FormErrors>({});
+  const [showPassword, setShowPw] = useState(false);
 
   const set = (field: keyof FormState, value: string) => {
     setForm((f) => ({ ...f, [field]: value }));
@@ -185,44 +202,56 @@ function EmployeeForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const errs = validate(form);
+    const errs = validate(form, mode);
     if (Object.keys(errs).length) { setErrors(errs); return; }
     onSave(form);
   };
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+      <div className="px-6 py-5 space-y-4 max-h-[72vh] overflow-y-auto">
+
+        {/* Employee ID (readonly saat edit) */}
         {employeeId && (
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1.5">Employee ID</label>
-            <input
-              type="text" value={employeeId} readOnly
-              className="w-full px-3 py-2.5 text-sm border border-gray-100 rounded-lg bg-gray-50 text-gray-400 cursor-not-allowed"
-            />
+            <input type="text" value={employeeId} readOnly
+              className="w-full px-3 py-2.5 text-sm border border-gray-100 rounded-lg bg-gray-50 text-gray-400 cursor-not-allowed" />
           </div>
         )}
+
+        {/* Nama */}
         <Field label="Nama Lengkap" required error={errors.name}>
-          <input type="text" value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="e.g. Jane Doe" className={inputCls(errors.name)} />
+          <input type="text" value={form.name} onChange={(e) => set("name", e.target.value)}
+            placeholder="e.g. Budi Santoso" className={inputCls(errors.name)} />
         </Field>
+
+        {/* Email + Telepon */}
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Email" required error={errors.email}>
-            <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="jane@company.com" className={inputCls(errors.email)} />
+          <Field label="Email Login" required error={errors.email}>
+            <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)}
+              placeholder="budi@company.com" className={inputCls(errors.email)} />
           </Field>
           <Field label="No. Telepon" error={errors.phone}>
-            <input type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+62 812-0000-0000" className={inputCls(errors.phone)} />
+            <input type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)}
+              placeholder="+62 812-0000-0000" className={inputCls(errors.phone)} />
           </Field>
         </div>
+
+        {/* Departemen + Jabatan */}
         <div className="grid grid-cols-2 gap-3">
           <Field label="Departemen" required>
             <select value={form.department} onChange={(e) => set("department", e.target.value)} className={inputCls()}>
               {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
           </Field>
-          <Field label="Role / Jabatan" required error={errors.role}>
-            <input type="text" value={form.role} onChange={(e) => set("role", e.target.value)} placeholder="e.g. Senior Engineer" className={inputCls(errors.role)} />
+          <Field label="Jabatan" required error={errors.role}>
+            <input type="text" value={form.role} onChange={(e) => set("role", e.target.value)}
+              placeholder="e.g. Senior Engineer" className={inputCls(errors.role)} />
           </Field>
         </div>
+
+        {/* Status + Tanggal Bergabung */}
         <div className="grid grid-cols-2 gap-3">
           <Field label="Status" required>
             <select value={form.status} onChange={(e) => set("status", e.target.value as Status)} className={inputCls()}>
@@ -233,12 +262,54 @@ function EmployeeForm({
             <input type="date" value={form.joinDate} onChange={(e) => set("joinDate", e.target.value)} className={inputCls(errors.joinDate)} />
           </Field>
         </div>
+
+        {/* Role Akses */}
+        <Field label="Role Akses" required>
+          <select value={form.authRole} onChange={(e) => set("authRole", e.target.value as AuthRole)} className={inputCls()}>
+            {AUTH_ROLES.map((r) => (
+              <option key={r} value={r}>{r === "hrd" ? "HRD" : "Karyawan"}</option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-400 mt-1">
+            HRD dapat mengakses seluruh dashboard. Karyawan hanya Daily Pulse.
+          </p>
+        </Field>
+
+        {/* Password */}
+        <Field
+          label={mode === "add" ? "Password Awal" : "Ganti Password"}
+          required={mode === "add"}
+          error={errors.password}
+        >
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={form.password}
+              onChange={(e) => set("password", e.target.value)}
+              placeholder={mode === "add" ? "Buat password untuk karyawan ini" : "Kosongkan jika tidak ingin diganti"}
+              className={inputCls(errors.password) + " pr-10"}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPw((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+          </div>
+          {mode === "add" && (
+            <p className="text-xs text-gray-400 mt-1">Karyawan dapat menggantinya nanti di Settings.</p>
+          )}
+        </Field>
+
       </div>
       <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2.5">
-        <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium">
+        <button type="button" onClick={onClose}
+          className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium">
           Batal
         </button>
-        <button type="submit" className="px-5 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm">
+        <button type="submit"
+          className="px-5 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm">
           {mode === "add" ? "Tambah Karyawan" : "Simpan Perubahan"}
         </button>
       </div>
@@ -246,11 +317,9 @@ function EmployeeForm({
   );
 }
 
-// ─── Delete confirmation ──────────────────────────────────────────────────────
+// ─── Delete dialog ────────────────────────────────────────────────────────────
 
-function DeleteDialog({
-  employee, onConfirm, onClose,
-}: {
+function DeleteDialog({ employee, onConfirm, onClose }: {
   employee: EmployeeRecord; onConfirm: () => void; onClose: () => void;
 }) {
   return (
@@ -261,22 +330,18 @@ function DeleteDialog({
         </div>
         <p className="text-gray-800 font-medium mb-1">Hapus {employee.name}?</p>
         <p className="text-gray-400 text-sm">
-          Data <span className="text-gray-600 font-medium">{employee.name}</span> ({employee.employeeId}) akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
+          Data <span className="text-gray-600 font-medium">{employee.name}</span> ({employee.employeeId}) akan dihapus permanen dan tidak dapat dibatalkan.
         </p>
       </div>
       <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2.5">
-        <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium">
-          Batal
-        </button>
-        <button onClick={onConfirm} className="px-5 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors shadow-sm">
-          Ya, Hapus
-        </button>
+        <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium">Batal</button>
+        <button onClick={onConfirm} className="px-5 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors shadow-sm">Ya, Hapus</button>
       </div>
     </Modal>
   );
 }
 
-// ─── Sort helper ──────────────────────────────────────────────────────────────
+// ─── Sort ─────────────────────────────────────────────────────────────────────
 
 type SortKey = "employeeId" | "name" | "department" | "role" | "status";
 type SortDir = "asc" | "desc";
@@ -294,22 +359,22 @@ function sortRecords(rows: EmployeeRecord[], key: SortKey, dir: SortDir) {
 type ModalState =
   | { type: "none" }
   | { type: "add" }
-  | { type: "edit"; employee: EmployeeRecord }
+  | { type: "edit";   employee: EmployeeRecord }
   | { type: "delete"; employee: EmployeeRecord };
 
 export function EmployeesPage() {
-  const [records, setRecords]   = useState<EmployeeRecord[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [search, setSearch]     = useState("");
+  const [records, setRecords]         = useState<EmployeeRecord[]>([]);
+  const [isLoading, setIsLoading]     = useState(true);
+  const [search, setSearch]           = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | Status>("All");
-  const [modal, setModal]       = useState<ModalState>({ type: "none" });
-  const [sortKey, setSortKey]   = useState<SortKey>("employeeId");
-  const [sortDir, setSortDir]   = useState<SortDir>("asc");
-  const [toast, setToast]       = useState<string | null>(null);
+  const [modal, setModal]             = useState<ModalState>({ type: "none" });
+  const [sortKey, setSortKey]         = useState<SortKey>("employeeId");
+  const [sortDir, setSortDir]         = useState<SortDir>("asc");
+  const [toast, setToast]             = useState<string | null>(null);
 
-  // ── Load data dari backend saat halaman dibuka ──
+  // ── Fetch ──
   useEffect(() => {
-    const fetchEmployees = async () => {
+    const load = async () => {
       try {
         const res  = await fetch(`${API_URL}/api/employees`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -321,14 +386,11 @@ export function EmployeesPage() {
           name:       emp.name,
           department: emp.department,
           role:       emp.role,
-          status:     emp.status ?? "Aktif",
-          // email & phone tidak ada di DB — generate sementara
-          email:    `${emp.name.split(" ")[0].toLowerCase()}@company.com`,
-          phone:    "+62 800-0000-0000",
-          joinDate: emp.join_date
-  ?? (emp.created_at
-    ? emp.created_at.split("T")[0]
-    : new Date().toISOString().split("T")[0]),
+          status:     emp.status    ?? "Aktif",
+          email:      emp.email     ?? `${emp.name.split(" ")[0].toLowerCase()}@company.com`,
+          phone:      "+62 800-0000-0000",
+          joinDate:   resolveJoinDate(emp),
+          authRole:   (emp.auth_role as AuthRole) ?? "karyawan",
         }));
 
         setRecords(mapped);
@@ -339,8 +401,7 @@ export function EmployeesPage() {
         setIsLoading(false);
       }
     };
-
-    fetchEmployees();
+    load();
   }, []);
 
   const showToast = (msg: string) => {
@@ -364,23 +425,25 @@ export function EmployeesPage() {
       const matchStatus = statusFilter === "All" || e.status === statusFilter;
       return matchSearch && matchStatus;
     }),
-    sortKey,
-    sortDir,
+    sortKey, sortDir,
   );
 
-  // ── CRUD handlers ──
+  // ── CRUD ──
 
   const handleAdd = async (data: FormState) => {
     try {
       const res = await fetch(`${API_URL}/api/employees`, {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name:       data.name,
           department: data.department,
           role:       data.role,
           status:     data.status,
-          join_date:  data.joinDate || new Date().toISOString().split("T")[0],
+          join_date:  data.joinDate,
+          email:      data.email,
+          password:   data.password,
+          auth_role:  data.authRole,
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -392,14 +455,11 @@ export function EmployeesPage() {
         name:       newEmp.name,
         department: newEmp.department,
         role:       newEmp.role,
-        status:     newEmp.status ?? "Aktif",
-        email:      `${newEmp.name.split(" ")[0].toLowerCase()}@company.com`,
+        status:     newEmp.status    ?? "Aktif",
+        email:      newEmp.email     ?? data.email,
         phone:      "+62 800-0000-0000",
-        joinDate:
-  newEmp.join_date ??
-  (newEmp.created_at
-    ? newEmp.created_at.split("T")[0]
-    : new Date().toISOString().split("T")[0]),
+        joinDate:   resolveJoinDate(newEmp),
+        authRole:   (newEmp.auth_role as AuthRole) ?? "karyawan",
       };
 
       setRecords((r) => [formatted, ...r]);
@@ -414,37 +474,39 @@ export function EmployeesPage() {
   const handleEdit = async (data: FormState) => {
     if (modal.type !== "edit") return;
     const { id } = modal.employee;
-
     try {
+      const body: any = {
+        name:       data.name,
+        department: data.department,
+        role:       data.role,
+        status:     data.status,
+        join_date:  data.joinDate,
+        email:      data.email,
+        auth_role:  data.authRole,
+      };
+      // Hanya kirim password jika diisi
+      if (data.password.trim()) body.password = data.password;
+
       const res = await fetch(`${API_URL}/api/employees/${id}`, {
-        method: "PUT",
+        method:  "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name:       data.name,
-          department: data.department,
-          role:       data.role,
-          status:     data.status,
-          join_date:  data.joinDate || new Date().toISOString().split("T")[0],
-        }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const updated = await res.json();
 
       setRecords((r) =>
         r.map((e) =>
-          e.id === id
-            ? {
-                ...e,
-                name:       updated.name,
-                department: updated.department,
-                role:       updated.role,
-                status:     updated.status ?? "Aktif",
-                email:      `${updated.name.split(" ")[0].toLowerCase()}@company.com`,
-                joinDate:
-  updated.join_date ??
-  e.joinDate,
-              }
-            : e,
+          e.id === id ? {
+            ...e,
+            name:       updated.name,
+            department: updated.department,
+            role:       updated.role,
+            status:     updated.status   ?? "Aktif",
+            email:      updated.email    ?? data.email,
+            joinDate:   resolveJoinDate(updated),
+            authRole:   (updated.auth_role as AuthRole) ?? "karyawan",
+          } : e,
         ),
       );
       setModal({ type: "none" });
@@ -458,13 +520,9 @@ export function EmployeesPage() {
   const handleDelete = async () => {
     if (modal.type !== "delete") return;
     const { id, name } = modal.employee;
-
     try {
-      const res = await fetch(`${API_URL}/api/employees/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`${API_URL}/api/employees/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
       setRecords((r) => r.filter((e) => e.id !== id));
       setModal({ type: "none" });
       showToast(`${name} telah dihapus.`);
@@ -474,7 +532,7 @@ export function EmployeesPage() {
     }
   };
 
-  // ── UI helpers ──
+  // ── UI ──
 
   const SortIcon = ({ col }: { col: SortKey }) => (
     <span className="inline-flex flex-col ml-1 opacity-40">
@@ -483,11 +541,8 @@ export function EmployeesPage() {
     </span>
   );
 
-  const thCls = "px-5 py-3.5 text-left text-xs text-gray-400 uppercase tracking-wider font-medium select-none";
-
+  const thCls    = "px-5 py-3.5 text-left text-xs text-gray-400 uppercase tracking-wider font-medium select-none";
   const totalAktif = records.filter((r) => r.status === "Aktif").length;
-
-  // ── Render ──
 
   return (
     <div className="space-y-5">
@@ -495,10 +550,8 @@ export function EmployeesPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-gray-900 font-semibold text-lg">Employees</h1>
-          <p className="text-gray-400 text-sm mt-0.5">
-            {records.length} total · {totalAktif} aktif
-          </p>
+          <h1 className="text-gray-900 font-semibold text-lg">Karyawan</h1>
+          <p className="text-gray-400 text-sm mt-0.5">{records.length} total · {totalAktif} aktif</p>
         </div>
         <button
           onClick={() => setModal({ type: "add" })}
@@ -513,24 +566,17 @@ export function EmployeesPage() {
         <div className="relative flex-1 min-w-52 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
-            type="text"
-            placeholder="Cari nama, ID, role…"
-            value={search}
+            type="text" placeholder="Cari nama, ID, jabatan…" value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 bg-white text-gray-700 placeholder-gray-400 transition"
           />
         </div>
         <div className="flex items-center gap-1.5">
           {(["All", "Aktif", "Cuti", "Nonaktif"] as const).map((s) => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
+            <button key={s} onClick={() => setStatusFilter(s)}
               className={`px-3 py-2 text-xs rounded-lg font-medium transition-colors duration-150 whitespace-nowrap ${
-                statusFilter === s
-                  ? "bg-blue-600 text-white"
-                  : "bg-white border border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600"
-              }`}
-            >
+                statusFilter === s ? "bg-blue-600 text-white" : "bg-white border border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600"
+              }`}>
               {s === "All" ? "Semua" : s}
             </button>
           ))}
@@ -540,34 +586,29 @@ export function EmployeesPage() {
       {/* Table */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px]">
+          <table className="w-full min-w-[800px]">
             <thead className="border-b border-gray-100 bg-gray-50/60">
               <tr>
-                <th className={`${thCls} cursor-pointer hover:text-gray-600`} onClick={() => handleSort("employeeId")}>ID Karyawan <SortIcon col="employeeId" /></th>
+                <th className={`${thCls} cursor-pointer hover:text-gray-600`} onClick={() => handleSort("employeeId")}>ID <SortIcon col="employeeId" /></th>
                 <th className={`${thCls} cursor-pointer hover:text-gray-600`} onClick={() => handleSort("name")}>Nama <SortIcon col="name" /></th>
                 <th className={`${thCls} cursor-pointer hover:text-gray-600`} onClick={() => handleSort("department")}>Departemen <SortIcon col="department" /></th>
-                <th className={`${thCls} cursor-pointer hover:text-gray-600`} onClick={() => handleSort("role")}>Role <SortIcon col="role" /></th>
+                <th className={`${thCls} cursor-pointer hover:text-gray-600`} onClick={() => handleSort("role")}>Jabatan <SortIcon col="role" /></th>
                 <th className={`${thCls} cursor-pointer hover:text-gray-600`} onClick={() => handleSort("status")}>Status <SortIcon col="status" /></th>
+                <th className={thCls}>Akses</th>
                 <th className={`${thCls} text-right`}>Aksi</th>
               </tr>
             </thead>
 
             {isLoading ? (
               <tbody>
-                <tr>
-                  <td colSpan={6} className="text-center py-14 text-gray-400 text-sm">
-                    Memuat data dari database…
-                  </td>
-                </tr>
+                <tr><td colSpan={7} className="text-center py-14 text-gray-400 text-sm">Memuat data dari database…</td></tr>
               </tbody>
             ) : (
               <tbody className="divide-y divide-gray-50">
                 {filtered.map((emp, idx) => (
                   <tr key={emp.id} className="hover:bg-blue-50/30 transition-colors duration-100">
                     <td className="px-5 py-4">
-                      <span className="text-xs font-mono text-gray-400 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-md">
-                        {emp.employeeId}
-                      </span>
+                      <span className="text-xs font-mono text-gray-400 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-md">{emp.employeeId}</span>
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
@@ -581,20 +622,15 @@ export function EmployeesPage() {
                     <td className="px-5 py-4 text-sm text-gray-500">{emp.department}</td>
                     <td className="px-5 py-4 text-sm text-gray-600">{emp.role}</td>
                     <td className="px-5 py-4"><StatusBadge status={emp.status} /></td>
+                    <td className="px-5 py-4"><AuthRoleBadge role={emp.authRole} /></td>
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => setModal({ type: "edit", employee: emp })}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                          title="Edit"
-                        >
+                        <button onClick={() => setModal({ type: "edit", employee: emp })}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" title="Edit">
                           <Pencil size={14} />
                         </button>
-                        <button
-                          onClick={() => setModal({ type: "delete", employee: emp })}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                          title="Hapus"
-                        >
+                        <button onClick={() => setModal({ type: "delete", employee: emp })}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors" title="Hapus">
                           <Trash2 size={14} />
                         </button>
                       </div>
@@ -618,12 +654,8 @@ export function EmployeesPage() {
 
         {!isLoading && filtered.length > 0 && (
           <div className="px-5 py-3 border-t border-gray-50 flex items-center justify-between">
-            <p className="text-xs text-gray-400">
-              Menampilkan {filtered.length} dari {records.length} karyawan
-            </p>
-            <p className="text-xs text-gray-400">
-              Diurutkan: <span className="text-gray-500 font-medium">{sortKey}</span> ({sortDir})
-            </p>
+            <p className="text-xs text-gray-400">Menampilkan {filtered.length} dari {records.length} karyawan</p>
+            <p className="text-xs text-gray-400">Diurutkan: <span className="text-gray-500 font-medium">{sortKey}</span> ({sortDir})</p>
           </div>
         )}
       </div>
@@ -631,12 +663,7 @@ export function EmployeesPage() {
       {/* Modals */}
       {modal.type === "add" && (
         <Modal title="Tambah Karyawan Baru" onClose={() => setModal({ type: "none" })}>
-          <EmployeeForm
-            mode="add"
-            initial={emptyForm}
-            onSave={handleAdd}
-            onClose={() => setModal({ type: "none" })}
-          />
+          <EmployeeForm mode="add" initial={emptyForm} onSave={handleAdd} onClose={() => setModal({ type: "none" })} />
         </Modal>
       )}
 
@@ -653,6 +680,8 @@ export function EmployeesPage() {
               phone:      modal.employee.phone,
               status:     modal.employee.status,
               joinDate:   modal.employee.joinDate,
+              authRole:   modal.employee.authRole,
+              password:   "",
             }}
             onSave={handleEdit}
             onClose={() => setModal({ type: "none" })}
@@ -661,11 +690,7 @@ export function EmployeesPage() {
       )}
 
       {modal.type === "delete" && (
-        <DeleteDialog
-          employee={modal.employee}
-          onConfirm={handleDelete}
-          onClose={() => setModal({ type: "none" })}
-        />
+        <DeleteDialog employee={modal.employee} onConfirm={handleDelete} onClose={() => setModal({ type: "none" })} />
       )}
 
       {/* Toast */}

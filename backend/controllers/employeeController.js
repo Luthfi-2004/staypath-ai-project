@@ -16,9 +16,9 @@ const getEmployees = async (req, res) => {
   }
 };
 
-// 2. POST: Tambah karyawan baru ke Supabase
+// 2. POST: Tambah karyawan baru
 const addEmployee = async (req, res) => {
-  const { name, department, role, status, join_date } = req.body;
+  const { name, department, role, status, join_date, email, password, auth_role } = req.body;
   try {
     const { data, error } = await supabase
       .from('employees')
@@ -26,13 +26,16 @@ const addEmployee = async (req, res) => {
         name,
         department,
         role,
-        status: status || 'Aktif',
-        join_date
+        status:    status    || 'Aktif',
+        join_date: join_date || new Date().toISOString().split('T')[0],
+        email:     email     || null,
+        password:  password  || 'password123',
+        auth_role: auth_role || 'karyawan',
       }])
       .select();
 
     if (error) throw error;
-    res.status(201).json(data[0]); // Balikin data yang baru sukses dibuat
+    res.status(201).json(data[0]);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Gagal menambahkan data" });
@@ -42,17 +45,25 @@ const addEmployee = async (req, res) => {
 // 3. PUT: Update data karyawan berdasarkan ID
 const updateEmployee = async (req, res) => {
   const { id } = req.params;
-  const { name, department, role, status, join_date } = req.body;
+  const { name, department, role, status, join_date, email, password, auth_role } = req.body;
   try {
+    const updateData = {
+      name,
+      department,
+      role,
+      status:    status    || 'Aktif',
+      join_date: join_date || new Date().toISOString().split('T')[0],
+      auth_role: auth_role || 'karyawan',
+    };
+
+    // Hanya update email jika dikirim
+    if (email !== undefined) updateData.email = email;
+    // Hanya update password jika dikirim dan tidak kosong
+    if (password && password.trim()) updateData.password = password;
+
     const { data, error } = await supabase
       .from('employees')
-      .update({
-        name,
-        department,
-        role,
-        status: status || 'Aktif',
-        join_date
-      })
+      .update(updateData)
       .eq('id', id)
       .select();
 
@@ -81,10 +92,4 @@ const deleteEmployee = async (req, res) => {
   }
 };
 
-// Export semua fungsi agar bisa dibaca oleh file Routes
-module.exports = {
-  getEmployees,
-  addEmployee,
-  updateEmployee,
-  deleteEmployee
-};
+module.exports = { getEmployees, addEmployee, updateEmployee, deleteEmployee };

@@ -3,6 +3,7 @@ const cors    = require('cors');
 require('dotenv').config();
 
 // ── Routes ─────────────────────────────────────────────────────────────────────
+const authRoutes      = require('./routes/authRoutes');
 const employeeRoutes  = require('./routes/employeeRoutes');
 const pulseRoutes     = require('./routes/pulseRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
@@ -15,15 +16,15 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173'
 }));
 app.use(express.json());
-const authRoutes = require('./routes/authRoutes');
-app.use('/api/auth', authRoutes);
-// ── Register routes ────────────────────────────────────────────────────────────
-app.use('/api/employees',  employeeRoutes);
-app.use('/api/pulse',      pulseRoutes);
-app.use('/api/dashboard',  dashboardRoutes);
-// app.use('/api/ai',      aiRoutes);
 
-// ── Start (Diubah untuk Vercel Serverless) ─────────────────────────────────────
+// ── Register routes ────────────────────────────────────────────────────────────
+app.use('/api/auth',      authRoutes);
+app.use('/api/employees', employeeRoutes);
+app.use('/api/pulse',     pulseRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+// app.use('/api/ai',     aiRoutes);
+
+// ── Start (local dev) ──────────────────────────────────────────────────────────
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 5001;
   app.listen(PORT, () => {
@@ -31,5 +32,5 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// WAJIB ADA: Export app untuk Vercel
+// WAJIB: Export untuk Vercel
 module.exports = app;
