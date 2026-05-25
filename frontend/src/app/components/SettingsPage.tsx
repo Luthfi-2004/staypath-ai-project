@@ -1,239 +1,300 @@
-import { useState, useId, useEffect } from "react";
-import { User, SlidersHorizontal, Check, Mail, Briefcase, UserCircle2, Lock, Loader2 } from "lucide-react";
+import { useState, useId } from "react";
+import { User, SlidersHorizontal, Check, Mail, UserCircle2, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
-interface ProfileForm {
-  fullName: string;
-  email:    string;
-  role:     string;
-}
-
-interface Preferences {
-  dailyPulseReminders: boolean;
-  highRiskAlerts:      boolean;
-}
-
 type SaveState = "idle" | "saving" | "saved";
+
+// ─── Toggle ───────────────────────────────────────────────────────────────────
 
 function Toggle({ id, checked, onChange, label, description }: {
   id: string; checked: boolean; onChange: (v: boolean) => void;
   label: string; description: string;
 }) {
   return (
-    <label htmlFor={id} className="flex items-center justify-between gap-6 cursor-pointer group">
+    <label htmlFor={id} className="flex items-start justify-between gap-8 cursor-pointer group py-1">
       <div className="flex-1">
-        <p className="text-sm text-gray-800 font-medium group-hover:text-gray-900 transition-colors">{label}</p>
-        <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{description}</p>
+        <p className="text-sm text-gray-800 font-medium leading-snug group-hover:text-gray-900 transition-colors">
+          {label}
+        </p>
+        <p className="text-sm text-gray-400 mt-1 leading-relaxed">{description}</p>
       </div>
-      <div className="relative flex-shrink-0">
-        <input id={id} type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="sr-only peer" />
-        <div className={`w-11 h-6 rounded-full border transition-all duration-200 ${checked ? "bg-blue-600 border-blue-600" : "bg-gray-100 border-gray-200 group-hover:border-gray-300"}`} />
-        <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${checked ? "translate-x-5" : "translate-x-0"}`}>
-          {checked && <div className="flex items-center justify-center w-full h-full"><Check size={10} className="text-blue-600 stroke-[3]" /></div>}
+      <div className="relative flex-shrink-0 mt-0.5">
+        <input id={id} type="checkbox" checked={checked}
+          onChange={(e) => onChange(e.target.checked)} className="sr-only peer" />
+        <div className={`w-12 h-6 rounded-full border-2 transition-all duration-200 ${
+          checked ? "bg-blue-600 border-blue-600" : "bg-gray-100 border-gray-200 group-hover:border-gray-300"
+        }`} />
+        <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-md
+          transition-transform duration-200 ease-in-out ${checked ? "translate-x-6" : "translate-x-0"}`}>
+          {checked && (
+            <div className="flex items-center justify-center w-full h-full">
+              <Check size={10} className="text-blue-600 stroke-[3]" />
+            </div>
+          )}
         </div>
       </div>
     </label>
   );
 }
 
-function InputField({ id, label, type = "text", value, placeholder, icon, onChange, hint, readOnly }: {
-  id: string; label: string; type?: string; value: string;
-  placeholder?: string; icon: React.ReactNode;
-  onChange: (v: string) => void; hint?: string; readOnly?: boolean;
+// ─── Field ────────────────────────────────────────────────────────────────────
+
+function Field({ label, hint, children }: {
+  label: string; hint?: string; children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
-      <label htmlFor={id} className="block text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</label>
-      <div className="relative">
-        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none">{icon}</span>
-        <input
-          id={id} type={type} value={value} readOnly={readOnly}
-          onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-          className={`w-full pl-10 pr-4 py-3 text-sm text-gray-800 placeholder-gray-300 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 hover:border-gray-300 transition-all duration-150 ${readOnly ? "bg-gray-50 cursor-not-allowed text-gray-400" : ""}`}
-        />
-      </div>
-      {hint && <p className="text-xs text-gray-400">{hint}</p>}
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      {children}
+      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
     </div>
   );
 }
 
-function Card({ icon, title, description, children }: {
-  icon: React.ReactNode; title: string; description: string; children: React.ReactNode;
+const inputCls = (readOnly?: boolean) =>
+  `w-full px-4 py-3 text-sm rounded-xl border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 ${
+    readOnly
+      ? "bg-gray-50 border-gray-100 text-gray-400 cursor-not-allowed"
+      : "bg-white border-gray-200 text-gray-800 hover:border-gray-300"
+  }`;
+
+// ─── Section card ─────────────────────────────────────────────────────────────
+
+function Section({ title, description, icon, children }: {
+  title: string; description: string;
+  icon: React.ReactNode; children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="px-7 py-5 border-b border-gray-100 flex items-center gap-3.5">
-        <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">{icon}</div>
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
+      {/* Header */}
+      <div className="px-8 py-6 border-b border-gray-100 flex items-center gap-4">
+        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+          {icon}
+        </div>
         <div>
-          <p className="text-sm text-gray-900 font-semibold">{title}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{description}</p>
+          <p className="text-base font-semibold text-gray-900">{title}</p>
+          <p className="text-sm text-gray-400 mt-0.5">{description}</p>
         </div>
       </div>
-      <div className="px-7 py-6">{children}</div>
+      {/* Body */}
+      <div className="px-8 py-7">{children}</div>
     </div>
   );
 }
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
 export function SettingsPage() {
   const uid = useId();
 
-  // ── Ambil dari localStorage yang diset saat login ──
-  const employeeId   = localStorage.getItem("employee_id")    || "";
-  const employeeName = localStorage.getItem("employee_name")  || "";
-  const employeeEmail= localStorage.getItem("employee_email") || "";
+  const employeeId    = localStorage.getItem("employee_id")    || "";
+  const employeeName  = localStorage.getItem("employee_name")  || "";
+  const employeeEmail = localStorage.getItem("employee_email") || "";
 
-  const [profile, setProfile] = useState<ProfileForm>({
-    fullName: employeeName,
-    email:    employeeEmail,
-    role:     localStorage.getItem("job_title") || "",
-  });
+  const [name, setName] = useState(employeeName);
 
-  const [newPassword, setNewPassword]   = useState("");
-  const [confirmPass, setConfirmPass]   = useState("");
-  const [passError,   setPassError]     = useState("");
+  const [newPass, setNewPass]     = useState("");
+  const [confPass, setConfPass]   = useState("");
+  const [showNew, setShowNew]     = useState(false);
+  const [showConf, setShowConf]   = useState(false);
+  const [passError, setPassError] = useState("");
 
-  const [prefs, setPrefs] = useState<Preferences>({
-    dailyPulseReminders: true,
-    highRiskAlerts:      true,
-  });
+  const [pulseReminder, setPulseReminder] = useState(true);
+  const [riskAlerts,    setRiskAlerts]    = useState(true);
 
-  const [saveState,     setSaveState]     = useState<SaveState>("idle");
-  const [savePassState, setSavePassState] = useState<SaveState>("idle");
+  const [saveProfile, setSaveProfile] = useState<SaveState>("idle");
+  const [savePass,    setSavePass]    = useState<SaveState>("idle");
 
-  const setField = (field: keyof ProfileForm) => (value: string) =>
-    setProfile((p) => ({ ...p, [field]: value }));
+  const initials = name.split(" ").map((w) => w[0] ?? "").join("").slice(0, 2).toUpperCase() || "??";
 
-  const setPref = (key: keyof Preferences) => (checked: boolean) =>
-    setPrefs((p) => ({ ...p, [key]: checked }));
-
-  // Simpan nama (update localStorage)
-  const handleSave = () => {
-    if (saveState !== "idle") return;
-    setSaveState("saving");
-    // Update localStorage agar nama di topbar ikut berubah
-    localStorage.setItem("employee_name", profile.fullName);
+  const handleSaveProfile = () => {
+    if (saveProfile !== "idle") return;
+    setSaveProfile("saving");
+    localStorage.setItem("employee_name", name);
     setTimeout(() => {
-      setSaveState("saved");
-      setTimeout(() => setSaveState("idle"), 2000);
+      setSaveProfile("saved");
+      setTimeout(() => setSaveProfile("idle"), 2000);
     }, 600);
   };
 
-  // Ganti password
-  const handleChangePassword = async () => {
+  const handleSavePass = async () => {
     setPassError("");
-    if (!newPassword.trim()) { setPassError("Password baru wajib diisi."); return; }
-    if (newPassword.length < 6) { setPassError("Password minimal 6 karakter."); return; }
-    if (newPassword !== confirmPass) { setPassError("Konfirmasi password tidak cocok."); return; }
+    if (!newPass.trim())        { setPassError("Password baru wajib diisi."); return; }
+    if (newPass.length < 6)     { setPassError("Password minimal 6 karakter."); return; }
+    if (newPass !== confPass)   { setPassError("Konfirmasi password tidak cocok."); return; }
 
-    setSavePassState("saving");
+    setSavePass("saving");
     try {
       const res = await fetch(`${API_URL}/api/employees/${employeeId}`, {
         method:  "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: newPassword }),
+        body: JSON.stringify({ password: newPass }),
       });
       if (!res.ok) throw new Error();
-      setNewPassword("");
-      setConfirmPass("");
-      setSavePassState("saved");
-      setTimeout(() => setSavePassState("idle"), 2000);
+      setNewPass(""); setConfPass("");
+      setSavePass("saved");
+      setTimeout(() => setSavePass("idle"), 2500);
     } catch {
-      setPassError("Gagal mengubah password. Coba lagi.");
-      setSavePassState("idle");
+      setPassError("Gagal menyimpan password. Coba lagi.");
+      setSavePass("idle");
     }
   };
 
-  const initials = profile.fullName
-    .split(" ").map((w) => w[0] ?? "").join("").slice(0, 2).toUpperCase() || "??";
-
   return (
-    <div className="max-w-2xl space-y-5">
+    <div className="max-w-2xl mx-auto space-y-6">
 
-      <div>
-        <h1 className="text-gray-900 font-semibold text-lg">Pengaturan</h1>
-        <p className="text-gray-400 text-sm mt-0.5">Kelola detail akun dan preferensi notifikasi kamu.</p>
+      {/* Page title */}
+      <div className="pb-2">
+        <h1 className="text-gray-900 font-semibold text-xl">Pengaturan</h1>
+        <p className="text-gray-400 text-sm mt-1">Kelola akun dan preferensi notifikasi kamu.</p>
       </div>
 
-      {/* Card 1 — Profil */}
-      <Card icon={<User size={17} className="text-blue-600" />} title="Informasi Profil" description="Detail akun kamu">
-        <div className="flex items-center gap-4 mb-7 pb-6 border-b border-gray-50">
-          <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-            <span className="text-blue-700 font-semibold text-base">{initials}</span>
+      {/* ── Profil ── */}
+      <Section
+        icon={<User size={18} className="text-blue-600" />}
+        title="Informasi Profil"
+        description="Nama tampilan dan detail akun kamu"
+      >
+        {/* Avatar row */}
+        <div className="flex items-center gap-5 mb-8 pb-7 border-b border-gray-100">
+          <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+            <span className="text-blue-700 font-bold text-lg">{initials}</span>
           </div>
           <div>
-            <p className="text-sm text-gray-800 font-medium">{profile.fullName || "Nama Kamu"}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{profile.email}</p>
+            <p className="text-base font-semibold text-gray-800">{name || "Nama Kamu"}</p>
+            <p className="text-sm text-gray-400 mt-0.5">{employeeEmail}</p>
           </div>
         </div>
+
+        {/* Fields */}
         <div className="space-y-5">
-          <InputField
-            id={`${uid}-name`} label="Nama Lengkap" value={profile.fullName}
-            placeholder="Nama kamu" icon={<UserCircle2 size={15} />} onChange={setField("fullName")}
-          />
-          <InputField
-            id={`${uid}-email`} label="Email" type="email" value={profile.email}
-            placeholder="email@company.com" icon={<Mail size={15} />} onChange={setField("email")}
-            hint="Email digunakan untuk login." readOnly
-          />
+          <Field label="Nama Lengkap">
+            <div className="relative">
+              <UserCircle2 size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
+              <input
+                id={`${uid}-name`} type="text" value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Nama lengkap kamu"
+                className={`${inputCls()} pl-10`}
+              />
+            </div>
+          </Field>
+
+          <Field label="Email Login" hint="Email tidak dapat diubah. Hubungi HR jika perlu.">
+            <div className="relative">
+              <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
+              <input
+                id={`${uid}-email`} type="email" value={employeeEmail}
+                readOnly className={`${inputCls(true)} pl-10`}
+              />
+            </div>
+          </Field>
         </div>
-        <div className="mt-6 flex justify-end">
+
+        <div className="mt-7 flex justify-end">
           <button
-            onClick={handleSave} disabled={saveState !== "idle"}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold rounded-xl transition-colors"
+            onClick={handleSaveProfile}
+            disabled={saveProfile !== "idle"}
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
-            {saveState === "saving" && <Loader2 size={14} className="animate-spin" />}
-            {saveState === "saved"  && <Check size={14} />}
-            {saveState === "idle"   ? "Simpan Perubahan" : saveState === "saving" ? "Menyimpan…" : "Tersimpan!"}
+            {saveProfile === "saving" && <Loader2 size={15} className="animate-spin" />}
+            {saveProfile === "saved"  && <Check size={15} />}
+            {saveProfile === "idle" ? "Simpan" : saveProfile === "saving" ? "Menyimpan…" : "Tersimpan!"}
           </button>
         </div>
-      </Card>
+      </Section>
 
-      {/* Card 2 — Ganti Password */}
-      <Card icon={<Lock size={17} className="text-blue-600" />} title="Ganti Password" description="Perbarui password login kamu">
-        <div className="space-y-4">
-          <InputField
-            id={`${uid}-newpass`} label="Password Baru" type="password"
-            value={newPassword} placeholder="Minimal 6 karakter"
-            icon={<Lock size={15} />} onChange={setNewPassword}
-          />
-          <InputField
-            id={`${uid}-confirmpass`} label="Konfirmasi Password" type="password"
-            value={confirmPass} placeholder="Ulangi password baru"
-            icon={<Lock size={15} />} onChange={setConfirmPass}
-          />
-          {passError && <p className="text-xs text-red-500">{passError}</p>}
+      {/* ── Ganti Password ── */}
+      <Section
+        icon={<Lock size={18} className="text-blue-600" />}
+        title="Ganti Password"
+        description="Perbarui password login kamu"
+      >
+        <div className="space-y-5">
+          <Field label="Password Baru">
+            <div className="relative">
+              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
+              <input
+                id={`${uid}-newpass`}
+                type={showNew ? "text" : "password"}
+                value={newPass}
+                onChange={(e) => { setNewPass(e.target.value); setPassError(""); }}
+                placeholder="Minimal 6 karakter"
+                className={`${inputCls()} pl-10 pr-10`}
+              />
+              <button type="button" onClick={() => setShowNew((v) => !v)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </Field>
+
+          <Field label="Konfirmasi Password">
+            <div className="relative">
+              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
+              <input
+                id={`${uid}-confpass`}
+                type={showConf ? "text" : "password"}
+                value={confPass}
+                onChange={(e) => { setConfPass(e.target.value); setPassError(""); }}
+                placeholder="Ulangi password baru"
+                className={`${inputCls()} pl-10 pr-10`}
+              />
+              <button type="button" onClick={() => setShowConf((v) => !v)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                {showConf ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </Field>
+
+          {passError && (
+            <p className="text-sm text-red-500 bg-red-50 px-4 py-2.5 rounded-lg border border-red-100">
+              {passError}
+            </p>
+          )}
         </div>
-        <div className="mt-6 flex justify-end">
+
+        <div className="mt-7 flex justify-end">
           <button
-            onClick={handleChangePassword} disabled={savePassState !== "idle"}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold rounded-xl transition-colors"
+            onClick={handleSavePass}
+            disabled={savePass !== "idle"}
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
-            {savePassState === "saving" && <Loader2 size={14} className="animate-spin" />}
-            {savePassState === "saved"  && <Check size={14} />}
-            {savePassState === "idle"   ? "Ganti Password" : savePassState === "saving" ? "Menyimpan…" : "Berhasil!"}
+            {savePass === "saving" && <Loader2 size={15} className="animate-spin" />}
+            {savePass === "saved"  && <Check size={15} />}
+            {savePass === "idle" ? "Ganti Password" : savePass === "saving" ? "Menyimpan…" : "Berhasil!"}
           </button>
         </div>
-      </Card>
+      </Section>
 
-      {/* Card 3 — Preferensi */}
-      <Card icon={<SlidersHorizontal size={17} className="text-blue-600" />} title="Preferensi Notifikasi" description="Atur notifikasi yang kamu terima">
-        <div className="space-y-6">
-          <Toggle
-            id={`${uid}-pulse`} checked={prefs.dailyPulseReminders}
-            onChange={setPref("dailyPulseReminders")}
-            label="Pengingat Daily Pulse"
-            description="Terima pengingat harian untuk mengisi check-in mood kamu."
-          />
-          <div className="border-t border-gray-50" />
-          <Toggle
-            id={`${uid}-alerts`} checked={prefs.highRiskAlerts}
-            onChange={setPref("highRiskAlerts")}
-            label="Alert Risiko Tinggi"
-            description="Notifikasi saat ada karyawan yang masuk kategori risiko resign tinggi."
-          />
+      {/* ── Preferensi ── */}
+      <Section
+        icon={<SlidersHorizontal size={18} className="text-blue-600" />}
+        title="Preferensi Notifikasi"
+        description="Atur notifikasi yang kamu terima"
+      >
+        <div className="space-y-0 divide-y divide-gray-100">
+          <div className="pb-6">
+            <Toggle
+              id={`${uid}-pulse`}
+              checked={pulseReminder}
+              onChange={setPulseReminder}
+              label="Pengingat Daily Pulse"
+              description="Terima pengingat harian untuk mengisi check-in mood kamu setiap pagi."
+            />
+          </div>
+          <div className="pt-6">
+            <Toggle
+              id={`${uid}-alerts`}
+              checked={riskAlerts}
+              onChange={setRiskAlerts}
+              label="Alert Risiko Tinggi"
+              description="Dapatkan notifikasi saat ada karyawan yang masuk kategori risiko resign tinggi."
+            />
+          </div>
         </div>
-      </Card>
+      </Section>
 
     </div>
   );
