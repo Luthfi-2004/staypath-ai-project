@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   RefreshCw, ChevronUp, ChevronDown, Brain, ShieldAlert,
-  TrendingUp, Clock, CheckCircle2, MessageSquare, BookOpen,
-  DollarSign, Users, BarChart2,
+  TrendingUp, CheckCircle2, MessageSquare, BookOpen,
 } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
@@ -15,15 +14,15 @@ interface RiskFactor {
 }
 
 interface Prediction {
-  id:              number;
-  name:            string;
-  role:            string;
-  department:      string;
-  avatar:          string;
-  riskProbability: number;
-  riskFactors:     RiskFactor[];
+  id:                number;
+  name:              string;
+  role:              string;
+  department:        string;
+  avatar:            string;
+  riskProbability:   number;
+  riskFactors:       RiskFactor[];
   recommendedAction: { icon: React.ReactNode; text: string };
-  lastUpdated:     string;
+  lastUpdated:       string;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -32,48 +31,42 @@ function getInitials(name: string) {
   return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
 }
 
-// Derive risk factors dari data DB
 function buildRiskFactors(emp: any): RiskFactor[] {
   const factors: RiskFactor[] = [];
-  if (emp.burnout_score >= 7)              factors.push({ label: "Burnout score tinggi",      severity: "high"   });
-  if (emp.job_satisfaction_1_5 <= 2)       factors.push({ label: "Kepuasan kerja rendah",     severity: "high"   });
-  if (emp.fear_of_ai_replacement === "High") factors.push({ label: "Takut digantikan AI",     severity: "high"   });
-  if (emp.burnout_score >= 5 && emp.burnout_score < 7) factors.push({ label: "Burnout sedang", severity: "medium" });
-  if (emp.weekly_ai_upskilling_hrs >= 8)   factors.push({ label: "Beban upskilling tinggi",   severity: "medium" });
-  if (emp.ai_replaces_my_tasks_pct >= 50)  factors.push({ label: "Banyak tugas diganti AI",   severity: "medium" });
-  if (emp.job_satisfaction_1_5 <= 3 && emp.job_satisfaction_1_5 > 2) factors.push({ label: "Kepuasan kerja sedang", severity: "medium" });
-  if (factors.length === 0)                factors.push({ label: "Risiko rendah",              severity: "low"    });
+  if (emp.burnout_score >= 7)                                         factors.push({ label: "Burnout score tinggi",     severity: "high"   });
+  if (emp.job_satisfaction_1_5 <= 2)                                  factors.push({ label: "Kepuasan kerja rendah",    severity: "high"   });
+  if (emp.fear_of_ai_replacement === "High")                          factors.push({ label: "Takut digantikan AI",      severity: "high"   });
+  if (emp.burnout_score >= 5 && emp.burnout_score < 7)                factors.push({ label: "Burnout sedang",           severity: "medium" });
+  if (emp.weekly_ai_upskilling_hrs >= 8)                              factors.push({ label: "Beban upskilling tinggi",  severity: "medium" });
+  if (emp.ai_replaces_my_tasks_pct >= 50)                             factors.push({ label: "Banyak tugas diganti AI",  severity: "medium" });
+  if (emp.job_satisfaction_1_5 <= 3 && emp.job_satisfaction_1_5 > 2) factors.push({ label: "Kepuasan kerja sedang",    severity: "medium" });
+  if (factors.length === 0)                                           factors.push({ label: "Risiko rendah",            severity: "low"    });
   return factors.slice(0, 3);
 }
 
 function buildRecommendation(emp: any): { icon: React.ReactNode; text: string } {
-  if (emp.burnout_score >= 7)
-    return { icon: <MessageSquare size={13} />, text: "Jadwalkan 1:1 segera dengan HR" };
-  if (emp.job_satisfaction_1_5 <= 2)
-    return { icon: <TrendingUp size={13} />, text: "Tinjau jalur karir dan kompensasi" };
-  if (emp.fear_of_ai_replacement === "High")
-    return { icon: <BookOpen size={13} />, text: "Tawarkan program upskilling AI" };
-  if (emp.risk_score >= 0.7)
-    return { icon: <ShieldAlert size={13} />, text: "Lakukan intervensi segera" };
-  return { icon: <CheckCircle2 size={13} />, text: "Lanjutkan pemantauan rutin" };
+  if (emp.burnout_score >= 7)                    return { icon: <MessageSquare size={13} />, text: "Jadwalkan 1:1 segera dengan HR"       };
+  if (emp.job_satisfaction_1_5 <= 2)             return { icon: <TrendingUp size={13} />,    text: "Tinjau jalur karir dan kompensasi"    };
+  if (emp.fear_of_ai_replacement === "High")     return { icon: <BookOpen size={13} />,      text: "Tawarkan program upskilling AI"       };
+  if (emp.risk_score >= 0.7)                     return { icon: <ShieldAlert size={13} />,   text: "Lakukan intervensi segera"            };
+  return                                                { icon: <CheckCircle2 size={13} />,  text: "Lanjutkan pemantauan rutin"           };
 }
 
 function mapEmployeeToPrediction(emp: any): Prediction {
-  const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   return {
-    id:              emp.id,
-    name:            emp.name,
-    role:            emp.job_title || emp.role || "—",
-    department:      emp.department,
-    avatar:          getInitials(emp.name),
-    riskProbability: emp.risk_score ? Math.round(emp.risk_score * 100) : (
-      emp.attrition_risk === "High" ? 75 : emp.attrition_risk === "Medium" ? 50 : 20
-    ),
+    id:            emp.id,
+    name:          emp.name,
+    role:          emp.job_title || emp.role || "—",
+    department:    emp.department,
+    avatar:        getInitials(emp.name),
+    riskProbability: emp.risk_score
+      ? Math.round(emp.risk_score * 100)
+      : emp.attrition_risk === "High" ? 75 : emp.attrition_risk === "Medium" ? 50 : 20,
     riskFactors:       buildRiskFactors(emp),
     recommendedAction: buildRecommendation(emp),
     lastUpdated:       emp.last_predicted_at
       ? new Date(emp.last_predicted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-      : now,
+      : new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
   };
 }
 
@@ -115,32 +108,34 @@ function FactorChip({ factor }: { factor: RiskFactor }) {
 }
 
 const REFRESH_STEPS = [
-  { label: "Menghubungkan ke model…",  duration: 600 },
-  { label: "Menganalisis data…",       duration: 800 },
-  { label: "Menghitung skor risiko…",  duration: 700 },
-  { label: "Menghasilkan insight…",    duration: 600 },
-  { label: "Memperbarui tabel…",       duration: 400 },
+  "Menghubungkan ke model…",
+  "Menganalisis data…",
+  "Menghitung skor risiko…",
+  "Menghasilkan insight…",
+  "Memperbarui tabel…",
 ];
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─── Types sort/filter ────────────────────────────────────────────────────────
 
-type SortCol = "name" | "riskProbability" | "department";
-type SortDir = "asc" | "desc";
+type SortCol   = "name" | "riskProbability" | "department";
+type SortDir   = "asc" | "desc";
 type FilterTab = "all" | "high" | "medium" | "low";
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
 export function Predictions() {
   const [predictions,   setPredictions]   = useState<Prediction[]>([]);
   const [isLoading,     setIsLoading]     = useState(true);
   const [refreshStep,   setRefreshStep]   = useState(-1);
+  const [refreshError,  setRefreshError]  = useState<string | null>(null);
   const [lastRefreshed, setLastRefreshed] = useState<string | null>(null);
   const [sortCol,       setSortCol]       = useState<SortCol>("riskProbability");
   const [sortDir,       setSortDir]       = useState<SortDir>("desc");
   const [filterTab,     setFilterTab]     = useState<FilterTab>("all");
-  const stepTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const isRefreshing = refreshStep >= 0 && refreshStep < REFRESH_STEPS.length;
+  const isRefreshing = refreshStep >= 0;
 
-  // Load data awal dari DB
+  // ── Load awal dari DB ──
   useEffect(() => {
     const load = async () => {
       try {
@@ -164,43 +159,51 @@ export function Predictions() {
     load();
   }, []);
 
-  const handleSort = (col: SortCol) => {
-    if (sortCol === col) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    else { setSortCol(col); setSortDir(col === "riskProbability" ? "desc" : "asc"); }
-  };
-
-  // Simulasi refresh step — reload dari DB setelah selesai
-  const handleRefresh = () => {
+  // ── Refresh — panggil AI lalu reload DB ──
+  const handleRefresh = async () => {
     if (isRefreshing) return;
-    stepTimers.current.forEach(clearTimeout);
-    stepTimers.current = [];
+    setRefreshError(null);
     setRefreshStep(0);
 
-    let elapsed = 0;
-    REFRESH_STEPS.forEach((step, i) => {
-      elapsed += step.duration;
-      const t = setTimeout(async () => {
-        setRefreshStep(i + 1);
-        if (i === REFRESH_STEPS.length - 1) {
-          // Reload data dari DB
-          try {
-            const res  = await fetch(`${API_URL}/api/employees`);
-            const data = await res.json();
-            const mapped = data
-              .filter((e: any) => e.attrition_risk || e.burnout_score >= 5)
-              .map(mapEmployeeToPrediction)
-              .sort((a: Prediction, b: Prediction) => b.riskProbability - a.riskProbability);
-            setPredictions(mapped);
-            setLastRefreshed(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-          } catch { /* tetap tampilkan data lama */ }
-          setTimeout(() => setRefreshStep(-1), 400);
-        }
-      }, elapsed);
-      stepTimers.current.push(t);
-    });
+    try {
+      // Step 1-3: panggil Flask AI via Express
+      setRefreshStep(1);
+      const aiRes = await fetch(`${API_URL}/api/ai/predict-all`, {
+        method: "POST",
+      });
+      setRefreshStep(2);
+
+      if (!aiRes.ok) {
+        const errData = await aiRes.json().catch(() => ({}));
+        throw new Error(errData.error || `AI service error ${aiRes.status}`);
+      }
+
+      setRefreshStep(3);
+
+      // Step 4-5: reload data terbaru dari DB
+      setRefreshStep(4);
+      const empRes = await fetch(`${API_URL}/api/employees`);
+      if (!empRes.ok) throw new Error("Gagal reload data");
+      const data = await empRes.json();
+
+      setRefreshStep(5);
+      const mapped = data
+        .filter((e: any) => e.attrition_risk || e.burnout_score >= 5)
+        .map(mapEmployeeToPrediction)
+        .sort((a: Prediction, b: Prediction) => b.riskProbability - a.riskProbability);
+
+      setPredictions(mapped);
+      setLastRefreshed(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+
+    } catch (err: any) {
+      console.error("Refresh gagal:", err);
+      setRefreshError(err.message || "Gagal menghubungi AI service");
+    } finally {
+      setTimeout(() => setRefreshStep(-1), 500);
+    }
   };
 
-  // Filter & sort
+  // ── Sort & filter ──
   const filtered = predictions.filter((p) => {
     if (filterTab === "high")   return p.riskProbability >= 70;
     if (filterTab === "medium") return p.riskProbability >= 40 && p.riskProbability < 70;
@@ -209,10 +212,15 @@ export function Predictions() {
   });
 
   const display = [...filtered].sort((a, b) => {
-    if (sortCol === "name")            return sortDir === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
-    if (sortCol === "department")      return sortDir === "asc" ? a.department.localeCompare(b.department) : b.department.localeCompare(a.department);
+    if (sortCol === "name")       return sortDir === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+    if (sortCol === "department") return sortDir === "asc" ? a.department.localeCompare(b.department) : b.department.localeCompare(a.department);
     return sortDir === "asc" ? a.riskProbability - b.riskProbability : b.riskProbability - a.riskProbability;
   });
+
+  const handleSort = (col: SortCol) => {
+    if (sortCol === col) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortCol(col); setSortDir(col === "riskProbability" ? "desc" : "asc"); }
+  };
 
   const SortIcon = ({ col }: { col: SortCol }) => (
     <span className="inline-flex flex-col ml-1 opacity-40">
@@ -221,8 +229,6 @@ export function Predictions() {
     </span>
   );
 
-  const thCls = "px-5 py-3.5 text-left text-xs text-gray-400 uppercase tracking-wider font-medium select-none";
-
   const tabCounts = {
     all:    predictions.length,
     high:   predictions.filter((p) => p.riskProbability >= 70).length,
@@ -230,6 +236,9 @@ export function Predictions() {
     low:    predictions.filter((p) => p.riskProbability < 40).length,
   };
 
+  const thCls = "px-5 py-3.5 text-left text-xs text-gray-400 uppercase tracking-wider font-medium select-none";
+
+  // ── Render ──
   return (
     <div className="space-y-5">
 
@@ -241,17 +250,27 @@ export function Predictions() {
           </h1>
           <p className="text-gray-400 text-sm mt-0.5">
             {isLoading ? "Memuat data…" : `${predictions.length} karyawan dianalisis`}
-            {lastRefreshed && !isLoading && <span className="ml-2 text-gray-300">· Diperbarui {lastRefreshed}</span>}
+            {lastRefreshed && !isLoading && (
+              <span className="ml-2 text-gray-300">· Diperbarui {lastRefreshed}</span>
+            )}
           </p>
         </div>
-        <button
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
-        >
-          <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
-          {isRefreshing ? REFRESH_STEPS[Math.min(refreshStep, REFRESH_STEPS.length - 1)].label : "Refresh Data"}
-        </button>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+          >
+            <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
+            {isRefreshing
+              ? REFRESH_STEPS[Math.min(refreshStep, REFRESH_STEPS.length - 1)]
+              : "Jalankan AI & Refresh"
+            }
+          </button>
+          {refreshError && (
+            <p className="text-xs text-red-500">{refreshError}</p>
+          )}
+        </div>
       </div>
 
       {/* Filter tabs */}
@@ -259,10 +278,10 @@ export function Predictions() {
         {(["all", "high", "medium", "low"] as FilterTab[]).map((tab) => {
           const labels = { all: "Semua", high: "High Risk", medium: "Medium", low: "Low Risk" };
           const colors = {
-            all:    filterTab === tab ? "bg-blue-600 text-white" : "bg-white text-gray-500 border border-gray-200 hover:border-blue-300 hover:text-blue-600",
-            high:   filterTab === tab ? "bg-red-500 text-white"  : "bg-white text-red-500 border border-red-100 hover:border-red-300",
-            medium: filterTab === tab ? "bg-amber-500 text-white": "bg-white text-amber-600 border border-amber-100 hover:border-amber-300",
-            low:    filterTab === tab ? "bg-emerald-500 text-white": "bg-white text-emerald-600 border border-emerald-100 hover:border-emerald-300",
+            all:    filterTab === tab ? "bg-blue-600 text-white"     : "bg-white text-gray-500 border border-gray-200 hover:border-blue-300 hover:text-blue-600",
+            high:   filterTab === tab ? "bg-red-500 text-white"      : "bg-white text-red-500 border border-red-100 hover:border-red-300",
+            medium: filterTab === tab ? "bg-amber-500 text-white"    : "bg-white text-amber-600 border border-amber-100 hover:border-amber-300",
+            low:    filterTab === tab ? "bg-emerald-500 text-white"  : "bg-white text-emerald-600 border border-emerald-100 hover:border-emerald-300",
           };
           return (
             <button key={tab} onClick={() => setFilterTab(tab)}
@@ -291,9 +310,20 @@ export function Predictions() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {isLoading ? (
-                <tr><td colSpan={4} className="text-center py-16 text-gray-400 text-sm">Memuat data dari database…</td></tr>
+                <tr>
+                  <td colSpan={4} className="text-center py-16 text-gray-400 text-sm">
+                    Memuat data dari database…
+                  </td>
+                </tr>
               ) : display.length === 0 ? (
-                <tr><td colSpan={4} className="text-center py-16 text-gray-400 text-sm">Tidak ada data untuk filter ini.</td></tr>
+                <tr>
+                  <td colSpan={4} className="text-center py-16 text-gray-400 text-sm">
+                    {predictions.length === 0
+                      ? "Belum ada data prediksi. Klik \"Jalankan AI & Refresh\" untuk mulai."
+                      : "Tidak ada data untuk filter ini."
+                    }
+                  </td>
+                </tr>
               ) : display.map((p, idx) => {
                 const isHigh = p.riskProbability >= 70;
                 const isMed  = p.riskProbability >= 40 && p.riskProbability < 70;
@@ -333,11 +363,14 @@ export function Predictions() {
         </div>
         <div className="px-5 py-3.5 border-t border-gray-50 flex items-center justify-between flex-wrap gap-2">
           <p className="text-xs text-gray-400">
-            Menampilkan <span className="text-gray-500 font-medium">{display.length}</span> dari <span className="text-gray-500 font-medium">{predictions.length}</span> karyawan
+            Menampilkan <span className="text-gray-500 font-medium">{display.length}</span> dari{" "}
+            <span className="text-gray-500 font-medium">{predictions.length}</span> karyawan
           </p>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-violet-400" />
-            <p className="text-xs text-gray-400">Data dari Supabase · Fallback burnout score jika AI belum dijalankan</p>
+            <p className="text-xs text-gray-400">
+              Powered by Flask AI · Data tersimpan di Supabase
+            </p>
           </div>
         </div>
       </div>
