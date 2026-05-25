@@ -1,64 +1,57 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Activity, Loader2, AlertCircle } from "lucide-react";
+import { Activity, Loader2, AlertCircle, Mail, Lock } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
-type Role = "hrd" | "karyawan";
-
 export function LoginPage() {
-  const navigate = useNavigate();
-  const [role, setRole]         = useState<Role>("karyawan");
-  const [employeeId, setEmpId]  = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError]       = useState("");
-  const [loading, setLoading]   = useState(false);
+  const navigate            = useNavigate();
+  const [email, setEmail]   = useState("");
+  const [password, setPass] = useState("");
+  const [error, setError]   = useState("");
+  const [loading, setLoad]  = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // HRD: pakai password master (simpel untuk capstone)
-    if (role === "hrd") {
-      if (password !== "hrd123") {
-        setError("Password HRD salah.");
-        return;
-      }
-      localStorage.setItem("role",          "hrd");
-      localStorage.setItem("employee_name", "HR Manager");
-      localStorage.setItem("employee_id",   "0");
-      navigate("/dashboard");
+    if (!email.trim() || !password.trim()) {
+      setError("Email dan password wajib diisi.");
       return;
     }
 
-    // Karyawan: cek employee ID di database
-    if (!employeeId.trim()) {
-      setError("Employee ID wajib diisi.");
-      return;
-    }
-
-    setLoading(true);
+    setLoad(true);
     try {
-      // Cari karyawan berdasarkan ID
-      const numId = parseInt(employeeId.replace(/[^0-9]/g, ""));
-      const res   = await fetch(`${API_URL}/api/employees`);
-      if (!res.ok) throw new Error("Gagal menghubungi server");
-      const employees = await res.json();
+      const res  = await fetch(`${API_URL}/api/auth/login`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+      });
 
-      const found = employees.find((e: any) => e.id === numId);
-      if (!found) {
-        setError("Employee ID tidak ditemukan. Hubungi HR.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Email atau password salah.");
         return;
       }
 
-      localStorage.setItem("role",          "karyawan");
-      localStorage.setItem("employee_id",   String(found.id));
-      localStorage.setItem("employee_name", found.name);
-      navigate("/dashboard/dailypulse");
-    } catch (err) {
-      setError("Gagal menghubungi server. Coba lagi.");
+      // Simpan session
+      localStorage.setItem("employee_id",    String(data.id));
+      localStorage.setItem("employee_name",  data.name);
+      localStorage.setItem("employee_email", data.email);
+      localStorage.setItem("role",           data.auth_role);
+
+      // Arahkan berdasarkan role dari DB
+      if (data.auth_role === "hrd") {
+        navigate("/dashboard");
+      } else {
+        navigate("/dashboard/dailypulse");
+      }
+
+    } catch {
+      setError("Gagal menghubungi server. Pastikan backend sudah berjalan.");
     } finally {
-      setLoading(false);
+      setLoad(false);
     }
   };
 
@@ -79,56 +72,49 @@ export function LoginPage() {
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
           <h1 className="text-gray-900 font-semibold text-xl mb-1">Masuk ke Dashboard</h1>
-          <p className="text-gray-400 text-sm mb-6">Pilih role dan masukkan kredensial kamu.</p>
-
-          {/* Role selector */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            {(["karyawan", "hrd"] as Role[]).map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => { setRole(r); setError(""); }}
-                className={`py-3 rounded-xl text-sm font-semibold border-2 transition-all duration-150 ${
-                  role === r
-                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                    : "bg-white text-gray-500 border-gray-200 hover:border-blue-300 hover:text-blue-600"
-                }`}
-              >
-                {r === "karyawan" ? "👤 Karyawan" : "🏢 HRD"}
-              </button>
-            ))}
-          </div>
+          <p className="text-gray-400 text-sm mb-6">
+            Masukkan email dan password yang diberikan oleh HR.
+          </p>
 
           <form onSubmit={handleLogin} noValidate className="space-y-4">
-            {role === "karyawan" ? (
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                  Employee ID <span className="text-red-400">*</span>
-                </label>
+
+            {/* Email */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                Email <span className="text-red-400">*</span>
+              </label>
+              <div className="relative">
+                <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 <input
-                  type="text"
-                  value={employeeId}
-                  onChange={(e) => setEmpId(e.target.value)}
-                  placeholder="Contoh: 1 atau EMP-001"
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 text-gray-700 bg-white transition"
+                  type="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                  placeholder="nama@company.com"
+                  autoComplete="email"
+                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 text-gray-700 bg-white transition"
                 />
-                <p className="text-xs text-gray-400 mt-1">Minta Employee ID kamu ke tim HR.</p>
               </div>
-            ) : (
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                  Password HRD <span className="text-red-400">*</span>
-                </label>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                Password <span className="text-red-400">*</span>
+              </label>
+              <div className="relative">
+                <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 <input
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Masukkan password HRD"
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 text-gray-700 bg-white transition"
+                  onChange={(e) => { setPass(e.target.value); setError(""); }}
+                  placeholder="Masukkan password"
+                  autoComplete="current-password"
+                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 text-gray-700 bg-white transition"
                 />
               </div>
-            )}
+            </div>
 
+            {/* Error */}
             {error && (
               <div className="flex items-center gap-2 text-red-500 text-sm bg-red-50 px-3 py-2.5 rounded-lg border border-red-100">
                 <AlertCircle size={14} className="flex-shrink-0" />
@@ -136,25 +122,28 @@ export function LoginPage() {
               </div>
             )}
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 mt-1"
             >
-              {loading ? <><Loader2 size={16} className="animate-spin" /> Memverifikasi…</> : "Masuk"}
+              {loading
+                ? <><Loader2 size={16} className="animate-spin" /> Memverifikasi…</>
+                : "Masuk"
+              }
             </button>
           </form>
 
-          {/* Info box */}
+          {/* Info */}
           <div className="mt-5 p-3 bg-gray-50 rounded-lg border border-gray-100">
-            <p className="text-xs text-gray-400 font-medium mb-1">Info Login</p>
+            <p className="text-xs text-gray-400 font-medium mb-1">Belum punya akun?</p>
             <p className="text-xs text-gray-400">
-              {role === "karyawan"
-                ? "Karyawan hanya dapat mengakses halaman Daily Pulse."
-                : "HRD dapat mengakses seluruh dashboard, data karyawan, dan prediksi AI."}
+              Hubungi tim HR untuk mendapatkan email dan password login.
             </p>
           </div>
         </div>
+
       </div>
     </div>
   );
