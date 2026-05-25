@@ -7,7 +7,7 @@ const authRoutes      = require('./routes/authRoutes');
 const employeeRoutes  = require('./routes/employeeRoutes');
 const pulseRoutes     = require('./routes/pulseRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
-// const aiRoutes     = require('./routes/aiRoutes');  // aktifkan setelah AI siap
+const aiRoutes     = require('./routes/aiRoutes');  // aktifkan setelah AI siap
 
 const app = express();
 
@@ -22,7 +22,7 @@ app.use('/api/auth',      authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/pulse',     pulseRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-// app.use('/api/ai',     aiRoutes);
+app.use('/api/ai',     aiRoutes);
 
 // ── Start (local dev) ──────────────────────────────────────────────────────────
 if (process.env.NODE_ENV !== 'production') {
