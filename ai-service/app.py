@@ -3,20 +3,19 @@ from flask_cors import CORS
 import keras
 import tensorflow as tf
 import json
+import os
 
-# ── Custom Layer ───────────────────────────────────────────────────────────────
-@keras.saving.register_keras_serializable(package="Custom")
-class FeatureGateLayer(keras.layers.Layer):
-    def __init__(self, units=256, **kwargs):
+# ── Custom Layer (harus identik dengan saat training) ─────────────────────────
+@tf.keras.utils.register_keras_serializable(package="Custom")
+class FeatureGateLayer(tf.keras.layers.Layer):
+    def __init__(self, units, **kwargs):
         super().__init__(**kwargs)
         self.units = units
-        self.dense = keras.layers.Dense(units, activation='sigmoid')
-
-    def build(self, input_shape):
-        self.dense.build(input_shape)
+        self.gate_dense = tf.keras.layers.Dense(units, activation="sigmoid")
 
     def call(self, inputs):
-        return inputs * self.dense(inputs)
+        gate = self.gate_dense(inputs)
+        return inputs * gate
 
     def get_config(self):
         config = super().get_config()
@@ -25,44 +24,42 @@ class FeatureGateLayer(keras.layers.Layer):
 
 # ── Init app ───────────────────────────────────────────────────────────────────
 app = Flask(__name__)
-CORS(app)  # ← harus setelah app dibuat
+CORS(app)
 
 # ── Load model ─────────────────────────────────────────────────────────────────
-print("Memuat model AI Clean... (Tunggu sebentar)")
-model = keras.saving.load_model(
+print("Memuat model AI... (Tunggu sebentar)")
+model = tf.keras.models.load_model(
     'staypath_ai_clean.keras',
-    custom_objects={'FeatureGateLayer': FeatureGateLayer},
-    compile=False
+    custom_objects={'FeatureGateLayer': FeatureGateLayer}
 )
 
 with open('metadata.json', 'r') as f:
     metadata = json.load(f)
 
-print("✅ Model AI dan Metadata berhasil menyala dan siap menerima perintah!")
+print("✅ Model siap!")
 
 # ── Endpoint prediksi ──────────────────────────────────────────────────────────
 @app.route('/api/predict-risk', methods=['POST'])
 def predict_risk():
     try:
         data = request.json
-        tf_inputs = {}
+        threshold = metadata.get('best_threshold', 0.59)
+
+        feature_dict = {
+            "numeric": [[
+                float(data.get(col, metadata['num_medians'].get(col, 0.0)))
+                for col in metadata['numeric_cols']
+            ]]
+        }
 
         for col in metadata['categorical_cols']:
-            val = str(data.get(col, "Unknown"))
-            tf_inputs[col] = tf.constant([[val]])
+            val = str(data.get(col, metadata['cat_modes'].get(col, 'Unknown')))
+            feature_dict[col] = tf.constant([val])
 
-        num_values = []
-        for col in metadata['numeric_cols']:
-            default_val = metadata.get('num_medians', {}).get(col, 0.0)
-            val = float(data.get(col, default_val))
-            num_values.append(val)
+        prediction = model.predict(feature_dict, verbose=0)
+        risk_score = float(prediction.ravel()[0])
 
-        tf_inputs['numeric'] = tf.constant([num_values])
-
-        prediction = model.predict(tf_inputs, verbose=0)
-        risk_score = float(prediction[0][0])
-
-        if risk_score >= 0.70:
+        if risk_score >= threshold:
             risk_level = "High"
         elif risk_score >= 0.40:
             risk_level = "Medium"
@@ -76,13 +73,14 @@ def predict_risk():
         })
 
     except Exception as e:
-        print("Error saat prediksi:", str(e))
+        print("Error prediksi:", str(e))
         return jsonify({"error": str(e)}), 500
 
-# ── Health check (untuk Render) ────────────────────────────────────────────────
+# ── Health check ───────────────────────────────────────────────────────────────
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "ok"}), 200
 
 if __name__ == '__main__':
-    app.run(port=5002, debug=False)
+    port = int(os.environ.get('PORT', 5002))
+    app.run(host='0.0.0.0', port=port, debug=False)
