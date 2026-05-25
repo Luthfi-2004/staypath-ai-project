@@ -13,7 +13,7 @@ router.post('/login', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('employees')
-      .select('id, name, email, auth_role, department, role')
+      .select('id, name, email, auth_role, department, job_title, status')
       .eq('email', email.toLowerCase().trim())
       .eq('password', password)
       .single();
@@ -22,13 +22,17 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Email atau password salah' });
     }
 
+    if (data.status === 'Nonaktif') {
+      return res.status(403).json({ error: 'Akun kamu dinonaktifkan. Hubungi HR.' });
+    }
+
     res.json({
-      id:        data.id,
-      name:      data.name,
-      email:     data.email,
-      auth_role: data.auth_role,
-      department:data.department,
-      job_title: data.role,
+      id:         data.id,
+      name:       data.name,
+      email:      data.email,
+      auth_role:  data.auth_role,
+      department: data.department,
+      job_title:  data.job_title,
     });
 
   } catch (err) {

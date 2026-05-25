@@ -23,15 +23,15 @@ interface PageMeta {
 }
 
 const PAGE_META: Record<PageId, PageMeta> = {
-  dashboard:   { title: "Dashboard",   subtitle: "Selamat datang",                    icon: LayoutDashboard },
-  employees:   { title: "Karyawan",    subtitle: "Kelola data karyawan",              icon: Users           },
-  predictions: { title: "Prediksi",    subtitle: "Forecasting attrisi berbasis AI",   icon: TrendingUp      },
-  dailypulse:  { title: "Daily Pulse", subtitle: "Check-in harian kamu",              icon: HeartPulse      },
-  settings:    { title: "Pengaturan",  subtitle: "Akun & preferensi",                 icon: Settings        },
+  dashboard:   { title: "Dashboard",   subtitle: "Selamat datang",                  icon: LayoutDashboard },
+  employees:   { title: "Karyawan",    subtitle: "Kelola data karyawan",            icon: Users           },
+  predictions: { title: "Prediksi",    subtitle: "Forecasting attrisi berbasis AI", icon: TrendingUp      },
+  dailypulse:  { title: "Daily Pulse", subtitle: "Check-in harian kamu",            icon: HeartPulse      },
+  settings:    { title: "Pengaturan",  subtitle: "Akun & preferensi",               icon: Settings        },
 };
 
 // Halaman yang hanya boleh diakses HRD
-const HRD_ONLY_PAGES: PageId[] = ["dashboard", "employees", "predictions", "settings"];
+const HRD_ONLY: PageId[] = ["dashboard", "employees", "predictions", "settings"];
 
 function todayLabel() {
   return new Date().toLocaleDateString("id-ID", {
@@ -73,16 +73,15 @@ function TopbarMeta({ page }: { page: PageId }) {
 // ─── Notification panel ───────────────────────────────────────────────────────
 
 const NOTIFICATIONS = [
-  { id: 1, text: "Satu karyawan melebihi 90% risiko attrisi",    time: "2m lalu",  dot: "bg-red-500"    },
-  { id: 2, text: "4 karyawan sudah submit Daily Pulse",          time: "18m lalu", dot: "bg-blue-500"   },
-  { id: 3, text: "AI model selesai dijalankan ulang",            time: "1j lalu",  dot: "bg-violet-500" },
+  { id: 1, text: "Satu karyawan melebihi 90% risiko attrisi", time: "2m lalu",  dot: "bg-red-500"    },
+  { id: 2, text: "4 karyawan sudah submit Daily Pulse",       time: "18m lalu", dot: "bg-blue-500"   },
+  { id: 3, text: "AI model selesai dijalankan ulang",         time: "1j lalu",  dot: "bg-violet-500" },
 ];
 
 function NotificationPanel({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest("[data-notification-panel]")) onClose();
+      if (!(e.target as HTMLElement).closest("[data-notification-panel]")) onClose();
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -115,27 +114,25 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
 // ─── App ──────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const navigate    = useNavigate();
-  const location    = useLocation();
+  const navigate  = useNavigate();
+  const location  = useLocation();
+
+  // ── Pakai useState agar reaktif saat login/logout ──
+  const [role, setRole]               = useState<Role>(localStorage.getItem("role") as Role);
+  const [employeeName, setEmpName]    = useState(localStorage.getItem("employee_name") || "User");
   const [mobileOpen,  setMobileOpen]  = useState(false);
   const [searchOpen,  setSearchOpen]  = useState(false);
   const [notifOpen,   setNotifOpen]   = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // ── Auth state dari localStorage ──
-  const role:         Role   = localStorage.getItem("role") as Role;
-  const employeeName: string = localStorage.getItem("employee_name") || "User";
-
   // Redirect ke login kalau belum auth
   useEffect(() => {
-    if (!role) {
-      navigate("/login");
-    }
+    if (!role) navigate("/login");
   }, [role, navigate]);
 
   const getPageFromPath = (): PageId => {
     const path = location.pathname;
-    if (path.includes("/employees"))  return "employees";
+    if (path.includes("/employees"))   return "employees";
     if (path.includes("/predictions")) return "predictions";
     if (path.includes("/dailypulse"))  return "dailypulse";
     if (path.includes("/settings"))    return "settings";
@@ -145,8 +142,8 @@ export default function App() {
   const activePage = getPageFromPath();
 
   const handleNavigate = (page: string) => {
-    // Karyawan hanya boleh ke dailypulse
-    if (role === "karyawan" && page !== "dailypulse") return;
+    // Blok karyawan masuk ke halaman HRD
+    if (role === "karyawan" && HRD_ONLY.includes(page as PageId)) return;
     navigate(page === "dashboard" ? "/dashboard" : `/dashboard/${page}`);
     setMobileOpen(false);
   };
@@ -155,18 +152,27 @@ export default function App() {
     localStorage.removeItem("role");
     localStorage.removeItem("employee_id");
     localStorage.removeItem("employee_name");
+    localStorage.removeItem("employee_email");
+    setRole(null);
+    setEmpName("User");
     navigate("/login");
   };
+
+  if (!role) return null;
 
   const meta = PAGE_META[activePage];
   const Icon = meta.icon;
 
-  if (!role) return null; // tunggu redirect
+  // Kalau karyawan coba akses halaman HRD langsung via URL → redirect ke dailypulse
+  if (role === "karyawan" && HRD_ONLY.includes(activePage)) {
+    navigate("/dashboard/dailypulse");
+    return null;
+  }
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
 
-      {/* ── Sidebar desktop ── */}
+      {/* Sidebar desktop */}
       <aside className="hidden lg:flex flex-shrink-0">
         <Sidebar
           activePage={activePage}
@@ -177,7 +183,7 @@ export default function App() {
         />
       </aside>
 
-      {/* ── Sidebar mobile overlay ── */}
+      {/* Sidebar mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 flex lg:hidden">
           <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
@@ -194,7 +200,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ── Main content ── */}
+      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {/* Topbar */}
@@ -219,7 +225,7 @@ export default function App() {
 
           <TopbarMeta page={activePage} />
 
-          {/* Search (HRD only) */}
+          {/* Search — HRD only */}
           {role === "hrd" && (
             <div className="relative">
               {searchOpen ? (
@@ -243,7 +249,7 @@ export default function App() {
             </div>
           )}
 
-          {/* Notif (HRD only) */}
+          {/* Notif — HRD only */}
           {role === "hrd" && (
             <div className="relative">
               <button
@@ -270,7 +276,6 @@ export default function App() {
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-            {/* Karyawan hanya bisa akses dailypulse */}
             {role === "karyawan" ? (
               <DailyPulse />
             ) : (
