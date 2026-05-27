@@ -40,6 +40,8 @@ export function LoginPage() {
       localStorage.setItem("employee_name",  data.name);
       localStorage.setItem("employee_email", data.email);
       localStorage.setItem("role",           data.auth_role);
+      
+      localStorage.setItem("employee_status", data.status || "Aktif");
 
       // Arahkan berdasarkan role dari DB
       if (data.auth_role === "hrd") {
