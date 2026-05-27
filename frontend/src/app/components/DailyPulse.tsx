@@ -40,19 +40,30 @@ export function DailyPulse() {
   const employeeName = localStorage.getItem("employee_name") || "Karyawan";
 
   useEffect(() => {
-    // Ambil status karyawan. Mendukung format simpan JSON atau item terpisah
-    const userDataStr = localStorage.getItem("user");
-    if (userDataStr) {
-      try {
-        const userData = JSON.parse(userDataStr);
-        setEmployeeStatus(userData.status || "Aktif");
-      } catch (error) {
-        setEmployeeStatus("Aktif");
-      }
-    } else {
-      setEmployeeStatus(localStorage.getItem("employee_status") || "Aktif");
+    // 1. Ambil status bawaan dari localStorage (buat jaga-jaga kalau internet lelet)
+    const storedStatus = localStorage.getItem("employee_status") || "Aktif";
+    setEmployeeStatus(storedStatus);
+
+    // 2. Langsung nanya ke server, status TERBARU gw sekarang apa?
+    if (employeeId) {
+      fetch(`${API_URL}/api/auth/me/${employeeId}`)
+        .then((res) => {
+          if (!res.ok) throw new Error();
+          return res.json();
+        })
+        .then((data) => {
+          // Kalau status di server beda, update layarnya!
+          if (data.status) {
+            setEmployeeStatus(data.status);
+            // Update juga localStorage biar sinkron
+            localStorage.setItem("employee_status", data.status);
+          }
+        })
+        .catch(() => {
+          console.warn("Gagal mengecek status terbaru ke server.");
+        });
     }
-  }, []);
+  }, [employeeId]);
 
   const handleSubmit = async () => {
     if (selectedMood === null || !employeeId) return;

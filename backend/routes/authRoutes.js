@@ -41,4 +41,20 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// GET /api/auth/me/:id
+router.get('/me/:id', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('employees')
+      .select('status')
+      .eq('id', req.params.id)
+      .single();
+
+    if (error || !data) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Gagal mengambil status' });
+  }
+});
+
 module.exports = router;
