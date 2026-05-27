@@ -23,7 +23,6 @@ const riskConfig: Record<RiskLevel, { label: string; className: string; dot: str
 };
 
 function MoodBar({ score }: { score: number }) {
-  // score dari job_satisfaction_1_5 (1–5) — normalisasi ke 10
   const normalized = (score / 5) * 10;
   const pct   = (normalized / 10) * 100;
   const color = normalized < 4 ? "bg-red-400" : normalized < 6 ? "bg-amber-400" : "bg-emerald-400";
@@ -49,12 +48,13 @@ export function EmployeeTable() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        // Tampilkan semua karyawan yang punya attrition_risk High atau Medium
-        // Kalau belum ada AI, tampilkan semua karyawan dengan burnout_score tinggi
+        // Cari yang statusnya udah Dijadwalkan dari awal
+        const intervenedIds = new Set<number>();
+
         const formatted: Employee[] = data
           .filter((emp: any) => {
+            if (emp.status === 'Dijadwalkan') intervenedIds.add(emp.id);
             if (emp.attrition_risk === 'High' || emp.attrition_risk === 'Medium') return true;
-            // Fallback: tampilkan yang burnout tinggi walau belum diprediksi AI
             if (!emp.attrition_risk && emp.burnout_score >= 6) return true;
             return false;
           })
@@ -65,14 +65,13 @@ export function EmployeeTable() {
             role:       emp.role,
             status:     emp.status,
             avatar:     emp.name.substring(0, 2).toUpperCase(),
-            // Pakai job_satisfaction_1_5 dari DB — bukan random lagi
             moodScore:  emp.job_satisfaction_1_5 ?? 3.0,
-            // Pakai attrition_risk dari DB, fallback berdasarkan burnout
             riskLevel: (emp.attrition_risk as RiskLevel)
               ?? (emp.burnout_score >= 7 ? 'High' : emp.burnout_score >= 5 ? 'Medium' : 'Low'),
           }));
 
         setEmployees(formatted);
+        setIntervened(intervenedIds);
       } catch (err) {
         console.error("Gagal fetch employees:", err);
       } finally {
@@ -83,8 +82,37 @@ export function EmployeeTable() {
     fetchEmployees();
   }, []);
 
-  const handleIntervene = (id: number) => {
+  // 🌟 KODINGAN YANG BENER BUAT UPDATE DATABASE 🌟
+  const handleIntervene = async (id: number) => {
+    // 1. Ubah tampilan seketika (Biar kerasa responsif)
     setIntervened((prev) => new Set([...prev, id]));
+
+    try {
+      // 2. Ambil data asli dari backend dulu
+      const getRes = await fetch(`${API_URL}/api/employees`);
+      const allEmp = await getRes.json();
+      const targetEmp = allEmp.find((e: any) => e.id === id);
+
+      if (!targetEmp) return;
+
+      // 3. Tembak API backend lu buat bener-bener UPDATE STATUS ke database!
+      await fetch(`${API_URL}/api/employees/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: targetEmp.name,
+          department: targetEmp.department,
+          role: targetEmp.role,
+          join_date: targetEmp.join_date,
+          auth_role: targetEmp.auth_role,
+          email: targetEmp.email,
+          status: "Dijadwalkan", // 🔴 INI KUNCI SAKTINYA
+        }),
+      });
+      
+    } catch (err) {
+      console.error("Gagal save intervene ke DB:", err);
+    }
   };
 
   return (
