@@ -48,7 +48,6 @@ export function EmployeeTable() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        // Cari yang statusnya udah Dijadwalkan dari awal
         const intervenedIds = new Set<number>();
 
         const formatted: Employee[] = data
@@ -82,36 +81,31 @@ export function EmployeeTable() {
     fetchEmployees();
   }, []);
 
-  // 🌟 KODINGAN YANG BENER BUAT UPDATE DATABASE 🌟
+  // ==========================================
+  // 🌟 PENGGUNAAN JALUR KHUSUS YANG BENAR 🌟
+  // ==========================================
   const handleIntervene = async (id: number) => {
-    // 1. Ubah tampilan seketika (Biar kerasa responsif)
+    // 1. Ubah UI langsung ceklis biar cepet
     setIntervened((prev) => new Set([...prev, id]));
 
     try {
-      // 2. Ambil data asli dari backend dulu
-      const getRes = await fetch(`${API_URL}/api/employees`);
-      const allEmp = await getRes.json();
-      const targetEmp = allEmp.find((e: any) => e.id === id);
-
-      if (!targetEmp) return;
-
-      // 3. Tembak API backend lu buat bener-bener UPDATE STATUS ke database!
-      await fetch(`${API_URL}/api/employees/${id}`, {
-        method: "PUT",
+      // 2. Tembak endpoint PATCH yang baru kita bikin di backend! Super aman!
+      const res = await fetch(`${API_URL}/api/employees/${id}/status`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: targetEmp.name,
-          department: targetEmp.department,
-          role: targetEmp.role,
-          join_date: targetEmp.join_date,
-          auth_role: targetEmp.auth_role,
-          email: targetEmp.email,
-          status: "Dijadwalkan", // 🔴 INI KUNCI SAKTINYA
-        }),
+        body: JSON.stringify({ status: "Dijadwalkan" }),
       });
-      
+
+      if (!res.ok) throw new Error("Database menolak update");
+
     } catch (err) {
       console.error("Gagal save intervene ke DB:", err);
+      // Kalau beneran gagal, balikin UI-nya supaya HRD tahu
+      setIntervened((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
     }
   };
 

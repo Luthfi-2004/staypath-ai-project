@@ -4,13 +4,18 @@ const {
   getEmployees, 
   addEmployee, 
   updateEmployee, 
-  deleteEmployee 
+  deleteEmployee,
+  updateEmployeeStatus // <-- Import fungsi barunya
 } = require('../controllers/employeeController');
 
 // Daftar endpoint API karyawan
-router.get('/', getEmployees);       // GET http://localhost:5001/api/employees
-router.post('/', addEmployee);     // POST http://localhost:5001/api/employees
-router.put('/:id', updateEmployee);  // PUT http://localhost:5001/api/employees/ID_KARYAWAN
-router.delete('/:id', deleteEmployee); // DELETE http://localhost:5001/api/employees/ID_KARYAWAN
+router.get('/', getEmployees);       
+router.post('/', addEmployee);     
+router.put('/:id', updateEmployee);  
+
+// 🌟 ENDPOINT JALUR KHUSUS 🌟
+router.patch('/:id/status', updateEmployeeStatus); 
+
+router.delete('/:id', deleteEmployee); 
 
 module.exports = router;

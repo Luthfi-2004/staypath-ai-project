@@ -56,9 +56,7 @@ const updateEmployee = async (req, res) => {
       auth_role: auth_role || 'karyawan',
     };
 
-    // Hanya update email jika dikirim
     if (email !== undefined) updateData.email = email;
-    // Hanya update password jika dikirim dan tidak kosong
     if (password && password.trim()) updateData.password = password;
 
     const { data, error } = await supabase
@@ -92,4 +90,32 @@ const deleteEmployee = async (req, res) => {
   }
 };
 
-module.exports = { getEmployees, addEmployee, updateEmployee, deleteEmployee };
+// ==========================================
+// 🌟 5. JALUR KHUSUS UPDATE STATUS DOANG 🌟
+// ==========================================
+const updateEmployeeStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  try {
+    const { data, error } = await supabase
+      .from('employees')
+      .update({ status })
+      .eq('id', id)
+      .select();
+
+    if (error) throw error;
+    res.json(data[0]);
+  } catch (err) {
+    console.error("Gagal update status:", err.message);
+    res.status(500).json({ error: "Gagal update status" });
+  }
+};
+
+// Jangan lupa update export-nya di bawah ini:
+module.exports = { 
+  getEmployees, 
+  addEmployee, 
+  updateEmployee, 
+  deleteEmployee, 
+  updateEmployeeStatus // <-- Ini baru
+};
