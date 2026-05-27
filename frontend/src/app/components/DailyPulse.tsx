@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CheckCircle, Loader2, AlertCircle } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 const moods = [
-  { emoji: "😞", label: "Rough day",    value: 1, bg: "bg-red-50",     border: "border-red-200",     ring: "ring-red-300",     text: "text-red-500",     activeBg: "bg-red-100"     },
-  { emoji: "😕", label: "Not great",    value: 2, bg: "bg-orange-50",  border: "border-orange-200",  ring: "ring-orange-300",  text: "text-orange-500",  activeBg: "bg-orange-100"  },
-  { emoji: "😐", label: "It's okay",    value: 3, bg: "bg-amber-50",   border: "border-amber-200",   ring: "ring-amber-300",   text: "text-amber-500",   activeBg: "bg-amber-100"   },
+  { emoji: "😞", label: "Rough day",    value: 1, bg: "bg-red-50",     border: "border-red-200",    ring: "ring-red-300",    text: "text-red-500",    activeBg: "bg-red-100"    },
+  { emoji: "😕", label: "Not great",    value: 2, bg: "bg-orange-50",  border: "border-orange-200", ring: "ring-orange-300", text: "text-orange-500", activeBg: "bg-orange-100" },
+  { emoji: "😐", label: "It's okay",    value: 3, bg: "bg-amber-50",   border: "border-amber-200",  ring: "ring-amber-300",  text: "text-amber-500",  activeBg: "bg-amber-100"  },
   { emoji: "🙂", label: "Pretty good",  value: 4, bg: "bg-emerald-50", border: "border-emerald-200", ring: "ring-emerald-300", text: "text-emerald-500", activeBg: "bg-emerald-100" },
-  { emoji: "😄", label: "Fantastic!",   value: 5, bg: "bg-blue-50",    border: "border-blue-200",    ring: "ring-blue-300",    text: "text-blue-500",    activeBg: "bg-blue-100"    },
+  { emoji: "😄", label: "Fantastic!",   value: 5, bg: "bg-blue-50",    border: "border-blue-200",   ring: "ring-blue-300",   text: "text-blue-500",   activeBg: "bg-blue-100"    },
 ];
 
 const workloadLabels: Record<number, { label: string; color: string }> = {
@@ -33,10 +33,26 @@ export function DailyPulse() {
   const [workload, setWorkload]         = useState(3);
   const [note, setNote]                 = useState("");
   const [status, setStatus]             = useState<Status>("idle");
+  const [employeeStatus, setEmployeeStatus] = useState("");
 
-  // Ambil employee_id dari auth context (disimpan saat login)
+  // Ambil data employee dari auth context/localStorage (disimpan saat login)
   const employeeId = parseInt(localStorage.getItem("employee_id") || "0");
   const employeeName = localStorage.getItem("employee_name") || "Karyawan";
+
+  useEffect(() => {
+    // Ambil status karyawan. Mendukung format simpan JSON atau item terpisah
+    const userDataStr = localStorage.getItem("user");
+    if (userDataStr) {
+      try {
+        const userData = JSON.parse(userDataStr);
+        setEmployeeStatus(userData.status || "Aktif");
+      } catch (error) {
+        setEmployeeStatus("Aktif");
+      }
+    } else {
+      setEmployeeStatus(localStorage.getItem("employee_status") || "Aktif");
+    }
+  }, []);
 
   const handleSubmit = async () => {
     if (selectedMood === null || !employeeId) return;
@@ -124,6 +140,20 @@ export function DailyPulse() {
   // ── Form ──
   return (
     <div className="max-w-lg mx-auto">
+      
+      {/* 🌟 BANNER NOTIFIKASI JADWAL 1-ON-1 🌟 */}
+      {employeeStatus === 'Dijadwalkan' && (
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-xl shadow-sm flex items-start animate-fade-in">
+          <AlertCircle className="h-6 w-6 text-blue-500 mr-3 mt-0.5 flex-shrink-0" />
+          <div>
+            <h3 className="text-blue-800 font-semibold text-lg">Undangan Sesi 1-on-1</h3>
+            <p className="text-blue-700 text-sm mt-1 leading-relaxed">
+              Tim HRD ingin menjadwalkan sesi ngobrol santai dengan Anda berdasarkan hasil evaluasi rutin. Silakan cek email Anda untuk detail jadwal atau hubungi tim HRD.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm px-8 py-8 mb-4">
 
         {/* Header */}
