@@ -45,17 +45,24 @@ def predict_risk():
         data = request.json
         threshold = metadata.get('best_threshold', 0.59)
 
+        # 1. Susun data numerik ke dalam list
+        num_values = [
+            float(data.get(col, metadata['num_medians'].get(col, 0.0)))
+            for col in metadata['numeric_cols']
+        ]
+
+        # 🔴 PERUBAHAN UTAMA: Bungkus list numerik dengan tf.constant & float32
         feature_dict = {
-            "numeric": [[
-                float(data.get(col, metadata['num_medians'].get(col, 0.0)))
-                for col in metadata['numeric_cols']
-            ]]
+            "numeric": tf.constant([num_values], dtype=tf.float32)
         }
 
+        # 2. Susun data kategorikal
         for col in metadata['categorical_cols']:
             val = str(data.get(col, metadata['cat_modes'].get(col, 'Unknown')))
-            feature_dict[col] = tf.constant([val])
+            # 🔴 PERBAIKAN: Bungkus juga dengan tf.constant & string
+            feature_dict[col] = tf.constant([val], dtype=tf.string)
 
+        # 3. Prediksi!
         prediction = model.predict(feature_dict, verbose=0)
         risk_score = float(prediction.ravel()[0])
 
