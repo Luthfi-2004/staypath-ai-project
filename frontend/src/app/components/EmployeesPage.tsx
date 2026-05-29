@@ -313,7 +313,7 @@ function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
+    <form onSubmit={(e) => e.preventDefault()} onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }} noValidate>
       <div className="px-6 py-5 max-h-[72vh] overflow-y-auto">
         {/* Step Indicator */}
         <div className="flex items-center justify-between mb-6 relative">
@@ -778,9 +778,10 @@ function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
             >
               Lanjut <ChevronRight size={15} />
             </button>
-          ) : (
+         ) : (
             <button
-              type="submit"
+              type="button"  // 🔴 Ubah dari "submit" menjadi "button"
+              onClick={handleSubmit} // 🔴 Panggil fungsinya secara manual di sini
               className="px-6 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm"
             >
               {mode === "add" ? "Simpan Data Karyawan" : "Simpan Perubahan"}
