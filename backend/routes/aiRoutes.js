@@ -1,15 +1,53 @@
-// backend/routes/aiRoutes.js  ← FILE BARU
 const express = require('express');
 const router = express.Router();
 const supabase = require('../config/supabase');
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:5002';
 
+// ============================================================================
+// 🧠 FUNGSI KUNCI: Menghitung metrik AI berdasarkan Daily Pulse Karyawan
+// ============================================================================
+async function getUpdatedMetrics(employeeId, currentSatisfaction, currentBurnout) {
+  // 1. Ambil riwayat Daily Pulse 7 hari terakhir
+  const { data: pulses } = await supabase
+    .from('daily_pulse')
+    .select('mood_score, workload_score')
+    .eq('employee_id', employeeId)
+    .order('submitted_at', { ascending: false })
+    .limit(7);
+
+  // 2. Kalau karyawan belum pernah ngisi pulse, kembalikan nilai bawaan (dari CSV)
+  if (!pulses || pulses.length === 0) {
+    return {
+      job_satisfaction_1_5: currentSatisfaction || 3.0,
+      burnout_score: currentBurnout || 50.0
+    };
+  }
+
+  // 3. Kalkulasi rata-rata (Agregasi)
+  const totalMood = pulses.reduce((sum, p) => sum + p.mood_score, 0);
+  const totalWorkload = pulses.reduce((sum, p) => sum + p.workload_score, 0);
+
+  const avgMood = totalMood / pulses.length;
+  const avgWorkload = totalWorkload / pulses.length;
+
+  // 4. Konversi ke standar yang dimengerti AI
+  // - Job Satisfaction tetap skala 1-5
+  // - Burnout AI butuh skala 0-100, jadi Workload (1-5) kita kali 20
+  return {
+    job_satisfaction_1_5: parseFloat(avgMood.toFixed(1)),
+    burnout_score: parseFloat((avgWorkload * 20).toFixed(1)) 
+  };
+}
+
+// ============================================================================
+// ENDPOINT 1: Prediksi 1 Karyawan (Misal dipanggil satuan)
+// ============================================================================
 router.post('/predict/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
-    // 1. Ambil data karyawan dari Supabase
+    // 1. Ambil data profil mentah dari database
     const { data: emp, error: fetchError } = await supabase
       .from('employees')
       .select('*')
@@ -20,7 +58,19 @@ router.post('/predict/:id', async (req, res) => {
       return res.status(404).json({ error: 'Karyawan tidak ditemukan' });
     }
 
-    // 2. Siapkan payload untuk Flask (mapping job_role dari role)
+    // 2. Minta nilai update dari Daily Pulse! (INI JEMBATANNYA)
+    const updatedMetrics = await getUpdatedMetrics(id, emp.job_satisfaction_1_5, emp.burnout_score);
+
+    // 3. Update ke database supaya Dashboard HRD juga ikutan berubah angkanya
+    await supabase
+      .from('employees')
+      .update({
+        job_satisfaction_1_5: updatedMetrics.job_satisfaction_1_5,
+        burnout_score: updatedMetrics.burnout_score
+      })
+      .eq('id', id);
+
+    // 4. Siapkan payload untuk Flask (Gunakan nilai baru dari Pulse!)
     const mlPayload = {
       job_role:                    emp.role,
       education_level:             emp.education_level   || 'Bachelor',
@@ -39,11 +89,12 @@ router.post('/predict/:id', async (req, res) => {
       ai_replaces_my_tasks_pct:    emp.ai_replaces_my_tasks_pct || 15.0,
       weekly_ai_upskilling_hrs:    emp.weekly_ai_upskilling_hrs || 1.0,
       productivity_score:          emp.productivity_score || 7.5,
-      burnout_score:               emp.burnout_score      || 3.0,
-      job_satisfaction_1_5:        emp.job_satisfaction_1_5 || 3.0,
+      // 👇 DATA REAL-TIME 👇
+      burnout_score:               updatedMetrics.burnout_score,
+      job_satisfaction_1_5:        updatedMetrics.job_satisfaction_1_5,
     };
 
-    // 3. Panggil Flask AI service
+    // 5. Panggil Flask AI service
     const aiResponse = await fetch(`${AI_SERVICE_URL}/api/predict-risk`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -54,7 +105,7 @@ router.post('/predict/:id', async (req, res) => {
     if (!aiResponse.ok) throw new Error('AI service error');
     const aiResult = await aiResponse.json();
 
-    // 4. Simpan hasil prediksi ke Supabase
+    // 6. Simpan hasil prediksi ke Supabase
     const { error: updateError } = await supabase
       .from('employees')
       .update({
@@ -78,7 +129,9 @@ router.post('/predict/:id', async (req, res) => {
   }
 });
 
-// Predict semua karyawan sekaligus (untuk tombol Refresh di halaman Predictions)
+// ============================================================================
+// ENDPOINT 2: Predict SEMUA Karyawan (Tombol Refresh di Dashboard)
+// ============================================================================
 router.post('/predict-all', async (req, res) => {
   try {
     const { data: employees, error } = await supabase
@@ -90,6 +143,18 @@ router.post('/predict-all', async (req, res) => {
     const results = [];
     for (const emp of employees) {
       try {
+        // Ambil metrik terbaru dari Pulse
+        const updatedMetrics = await getUpdatedMetrics(emp.id, emp.job_satisfaction_1_5, emp.burnout_score);
+
+        // Update database dengan metrik baru
+        await supabase
+          .from('employees')
+          .update({
+            job_satisfaction_1_5: updatedMetrics.job_satisfaction_1_5,
+            burnout_score: updatedMetrics.burnout_score
+          })
+          .eq('id', emp.id);
+
         const mlPayload = {
           job_role: emp.role,
           education_level: emp.education_level || 'Bachelor',
@@ -108,8 +173,9 @@ router.post('/predict-all', async (req, res) => {
           ai_replaces_my_tasks_pct: emp.ai_replaces_my_tasks_pct || 15.0,
           weekly_ai_upskilling_hrs: emp.weekly_ai_upskilling_hrs || 1.0,
           productivity_score: emp.productivity_score || 7.5,
-          burnout_score: emp.burnout_score || 3.0,
-          job_satisfaction_1_5: emp.job_satisfaction_1_5 || 3.0,
+          // 👇 DATA REAL-TIME 👇
+          burnout_score: updatedMetrics.burnout_score,
+          job_satisfaction_1_5: updatedMetrics.job_satisfaction_1_5,
         };
 
         const aiResponse = await fetch(`${AI_SERVICE_URL}/api/predict-risk`, {
@@ -122,6 +188,7 @@ router.post('/predict-all', async (req, res) => {
         if (!aiResponse.ok) continue;
         const aiResult = await aiResponse.json();
 
+        // Update hasil prediksi AI
         await supabase.from('employees').update({
           attrition_risk: aiResult.predicted_risk,
           risk_score: aiResult.risk_score,
