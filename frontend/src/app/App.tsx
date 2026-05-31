@@ -6,31 +6,48 @@ import { EmployeesPage } from "./components/EmployeesPage";
 import { Predictions } from "./components/Predictions";
 import { SettingsPage } from "./components/SettingsPage";
 import { DailyPulse } from "./components/DailyPulse";
+import { DashboardKaryawan } from "./components/DashboardKaryawan";
+import { ClockInOut } from "./components/ClockInOut";
+import { MyAttendances } from "./components/MyAttendances";
+import { MyTeam } from "./components/MyTeam";
+import { Projects } from "./components/Projects";
+import { LeaveRequestKaryawan } from "./components/LeaveRequestKaryawan";
+import { TeamsHR } from "./components/TeamsHR";
+import { AttendanceHR } from "./components/AttendanceHR";
 import {
   Menu, LayoutDashboard, Users, TrendingUp,
-  Settings, HeartPulse, Cpu, Calendar, LogOut, ChevronDown,
+  Settings, HeartPulse, Cpu, Calendar, LogOut, ChevronDown, Clock, FileText, Folder
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type PageId = "dashboard" | "employees" | "predictions" | "dailypulse" | "settings";
-type Role   = "hrd" | "karyawan" | null;
+type PageId = "dashboard" | "ourteams" | "employees" | "attendance" | "predictions" | "dailypulse" | "leaverequests" | "settings" | "clockinout" | "myattendances" | "myteam" | "projects" | "payroll" | "reports";
+type Role = "hrd" | "karyawan" | null;
 
 interface PageMeta {
-  title:    string;
+  title: string;
   subtitle: string;
-  icon:     React.ElementType;
+  icon: React.ElementType;
 }
 
 const PAGE_META: Record<PageId, PageMeta> = {
-  dashboard:   { title: "Dashboard",   subtitle: "Selamat datang",                  icon: LayoutDashboard },
-  employees:   { title: "Karyawan",    subtitle: "Kelola data karyawan",            icon: Users           },
-  predictions: { title: "Prediksi",    subtitle: "Forecasting attrisi berbasis AI", icon: TrendingUp      },
-  dailypulse:  { title: "Daily Pulse", subtitle: "Check-in harian kamu",            icon: HeartPulse      },
-  settings:    { title: "Pengaturan",  subtitle: "Akun & preferensi",               icon: Settings        },
+  dashboard: { title: "Dashboard", subtitle: "Selamat datang", icon: LayoutDashboard },
+  ourteams: { title: "Our Teams", subtitle: "Manage teams", icon: Users },
+  employees: { title: "Employees", subtitle: "Manage workforce", icon: Users },
+  attendance: { title: "Attendance", subtitle: "Review clock records", icon: Calendar },
+  predictions: { title: "Predictions", subtitle: "AI-based attrition forecasting", icon: TrendingUp },
+  dailypulse: { title: "Absensi", subtitle: "Clock-in dan Pulse harian", icon: HeartPulse },
+  leaverequests: { title: "Pengajuan Cuti", subtitle: "Ajukan izin atau cuti", icon: Settings },
+  clockinout: { title: "Clock In/Out", subtitle: "Record working time", icon: Clock },
+  myattendances: { title: "My Attendances", subtitle: "Attendance history", icon: FileText },
+  myteam: { title: "My Team", subtitle: "Colleagues in department", icon: Users },
+  projects: { title: "Projects", subtitle: "Coming Soon", icon: Folder },
+  payroll: { title: "Payroll", subtitle: "Coming Soon", icon: FileText },
+  reports: { title: "Reports", subtitle: "Coming Soon", icon: FileText },
+  settings: { title: "Pengaturan Profil", subtitle: "Akun & preferensi", icon: Settings },
 };
 
-const HRD_ONLY: PageId[] = ["dashboard", "employees", "predictions", "settings"];
+const HRD_ONLY: PageId[] = ["ourteams", "employees", "attendance", "predictions", "payroll", "reports"];
 
 function todayLabel() {
   return new Date().toLocaleDateString("id-ID", {
@@ -65,8 +82,8 @@ function TopbarMeta({ page }: { page: PageId }) {
 
 // ─── User dropdown (menggantikan tombol logout terpisah) ──────────────────────
 
-function UserDropdown({ name, role, onLogout }: {
-  name: string; role: Role; onLogout: () => void;
+function UserDropdown({ name, role, onLogout, onNavigate }: {
+  name: string; role: Role; onLogout: () => void; onNavigate: (page: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -122,6 +139,13 @@ function UserDropdown({ name, role, onLogout }: {
           {/* Actions */}
           <div className="p-1.5">
             <button
+              onClick={() => { onNavigate("settings"); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors font-medium mb-1"
+            >
+              <Settings size={15} />
+              Pengaturan Profil
+            </button>
+            <button
               onClick={() => { onLogout(); setOpen(false); }}
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 transition-colors font-medium"
             >
@@ -141,8 +165,8 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [role, setRole]             = useState<Role>(localStorage.getItem("role") as Role);
-  const [employeeName, setEmpName]  = useState(localStorage.getItem("employee_name") || "User");
+  const [role, setRole] = useState<Role>(localStorage.getItem("role") as Role);
+  const [employeeName, setEmpName] = useState(localStorage.getItem("employee_name") || "User");
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
@@ -151,10 +175,19 @@ export default function App() {
 
   const getPageFromPath = (): PageId => {
     const path = location.pathname;
-    if (path.includes("/employees"))   return "employees";
+    if (path.includes("/ourteams")) return "ourteams";
+    if (path.includes("/employees")) return "employees";
+    if (path.includes("/attendance")) return "attendance";
     if (path.includes("/predictions")) return "predictions";
-    if (path.includes("/dailypulse"))  return "dailypulse";
-    if (path.includes("/settings"))    return "settings";
+    if (path.includes("/dailypulse")) return "dailypulse";
+    if (path.includes("/leaverequests")) return "leaverequests";
+    if (path.includes("/clockinout")) return "clockinout";
+    if (path.includes("/myattendances")) return "myattendances";
+    if (path.includes("/myteam")) return "myteam";
+    if (path.includes("/projects")) return "projects";
+    if (path.includes("/payroll")) return "payroll";
+    if (path.includes("/reports")) return "reports";
+    if (path.includes("/settings")) return "settings";
     return "dashboard";
   };
 
@@ -182,7 +215,7 @@ export default function App() {
   const Icon = meta.icon;
 
   if (role === "karyawan" && HRD_ONLY.includes(activePage)) {
-    navigate("/dashboard/dailypulse");
+    navigate("/dashboard");
     return null;
   }
 
@@ -246,21 +279,31 @@ export default function App() {
           <TopbarMeta page={activePage} />
 
           {/* User dropdown — satu-satunya aksi di kanan atas */}
-          <UserDropdown name={employeeName} role={role} onLogout={handleLogout} />
+          <UserDropdown name={employeeName} role={role} onLogout={handleLogout} onNavigate={handleNavigate} />
         </header>
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
             {role === "karyawan" ? (
-              <DailyPulse />
+              <>
+                {activePage === "dashboard" && <DashboardKaryawan />}
+                {activePage === "clockinout" && <ClockInOut />}
+                {activePage === "myattendances" && <MyAttendances />}
+                {activePage === "myteam" && <MyTeam />}
+                {activePage === "projects" && <Projects />}
+                {activePage === "settings" && <SettingsPage />}
+              </>
             ) : (
               <>
-                {activePage === "dashboard"   && <DashboardPage />}
-                {activePage === "employees"   && <EmployeesPage />}
+                {activePage === "dashboard" && <DashboardPage onNavigate={handleNavigate} />}
+                {activePage === "ourteams" && <TeamsHR />}
+                {activePage === "employees" && <EmployeesPage />}
+                {activePage === "attendance" && <AttendanceHR />}
                 {activePage === "predictions" && <Predictions />}
-                {activePage === "dailypulse"  && <DailyPulse />}
-                {activePage === "settings"    && <SettingsPage />}
+                {activePage === "payroll" && <Projects />}
+                {activePage === "reports" && <Projects />}
+                {activePage === "settings" && <SettingsPage />}
               </>
             )}
           </div>

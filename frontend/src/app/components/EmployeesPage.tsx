@@ -57,7 +57,7 @@ interface EmployeeRecord {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const DEPARTMENTS = [
+export const DEPARTMENTS = [
   "Engineering", "Product", "Design", "Marketing", "Sales",
   "Analytics", "Finance", "Human Resources", "Operations",
 ];
@@ -83,7 +83,7 @@ function getInitials(name: string) {
 }
 
 function resolveJoinDate(emp: any): string {
-  if (emp.join_date)  return emp.join_date;
+  if (emp.join_date) return emp.join_date;
   if (emp.created_at) return emp.created_at.split("T")[0];
   return new Date().toISOString().split("T")[0];
 }
@@ -105,7 +105,7 @@ const statusDot: Record<string, string> = {
 
 function StatusBadge({ status }: { status: Status }) {
   const style = statusStyle[status] ?? statusStyle["Nonaktif"];
-  const dot   = statusDot[status]   ?? statusDot["Nonaktif"];
+  const dot = statusDot[status] ?? statusDot["Nonaktif"];
   return (
     <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium ${style}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
@@ -118,11 +118,10 @@ function StatusBadge({ status }: { status: Status }) {
 
 function AuthRoleBadge({ role }: { role: AuthRole }) {
   return (
-    <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-md font-medium ${
-      role === "hrd"
-        ? "bg-violet-50 text-violet-600 border border-violet-100"
-        : "bg-gray-50 text-gray-500 border border-gray-100"
-    }`}>
+    <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-md font-medium ${role === "hrd"
+      ? "bg-violet-50 text-violet-600 border border-violet-100"
+      : "bg-gray-50 text-gray-500 border border-gray-100"
+      }`}>
       {role === "hrd" ? "HRD" : "Karyawan"}
     </span>
   );
@@ -132,8 +131,8 @@ function AuthRoleBadge({ role }: { role: AuthRole }) {
 
 const avatarColors = [
   "bg-blue-100 text-blue-700", "bg-violet-100 text-violet-700",
-  "bg-rose-100 text-rose-600",  "bg-emerald-100 text-emerald-700",
-  "bg-amber-100 text-amber-700","bg-cyan-100 text-cyan-700",
+  "bg-rose-100 text-rose-600", "bg-emerald-100 text-emerald-700",
+  "bg-amber-100 text-amber-700", "bg-cyan-100 text-cyan-700",
 ];
 function Avatar({ name, index }: { name: string; index: number }) {
   const color = avatarColors[index % avatarColors.length];
@@ -146,7 +145,7 @@ function Avatar({ name, index }: { name: string; index: number }) {
 
 // ─── Form state ───────────────────────────────────────────────────────────────
 
-const emptyForm = {
+export const emptyForm = {
   // Step 1
   name: "",
   department: DEPARTMENTS[0],
@@ -180,7 +179,7 @@ const emptyForm = {
   job_satisfaction_1_5: 3.0,
 };
 
-type FormState  = typeof emptyForm;
+export type FormState = typeof emptyForm;
 type FormErrors = Partial<Record<keyof FormState, string>>;
 
 function validate(
@@ -190,7 +189,7 @@ function validate(
 ): FormErrors {
   const errors: FormErrors = {};
 
-  if (step === 1 || step === 3) {
+  if (step === 1 || step === 2) {
     if (!f.name.trim()) errors.name = "Nama wajib diisi.";
     if (!f.role.trim()) errors.role = "Jabatan wajib diisi.";
     if (!f.email.trim()) {
@@ -238,14 +237,13 @@ function Field({
 }
 
 const inputCls = (err?: string) =>
-  `w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 transition text-gray-700 bg-white ${
-    err ? "border-red-300 focus:ring-red-100 focus:border-red-400"
-        : "border-gray-200 focus:ring-blue-100 focus:border-blue-400"
+  `w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 transition text-gray-700 bg-white ${err ? "border-red-300 focus:ring-red-100 focus:border-red-400"
+    : "border-gray-200 focus:ring-blue-100 focus:border-blue-400"
   }`;
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
 
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   const backdropRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -278,12 +276,12 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 
 // ─── Employee form (Multi-Step) ───────────────────────────────────────────────
 
-function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
+export function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
   initial: FormState; employeeId?: string;
   onSave: (data: FormState) => void; onClose: () => void; mode: "add" | "edit";
 }) {
-  const [form, setForm]         = useState<FormState>(initial);
-  const [errors, setErrors]     = useState<FormErrors>({});
+  const [form, setForm] = useState<FormState>(initial);
+  const [errors, setErrors] = useState<FormErrors>({});
   const [showPassword, setShowPw] = useState(false);
   const [step, setStep] = useState(1);
 
@@ -303,7 +301,7 @@ function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const errs = validate(form, mode, 3);
+    const errs = validate(form, mode, 2);
     if (Object.keys(errs).length) {
       setErrors(errs);
       if (errs.name || errs.email || errs.role) setStep(1);
@@ -316,26 +314,25 @@ function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
     <form onSubmit={(e) => e.preventDefault()} onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }} noValidate>
       <div className="px-6 py-5 max-h-[72vh] overflow-y-auto">
         {/* Step Indicator */}
-        <div className="flex items-center justify-between mb-6 relative">
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-gray-100 -z-10"></div>
-          {[1, 2, 3].map((num) => (
+        <div className="flex items-center justify-between mb-6 relative px-8">
+          <div className="absolute left-8 right-8 top-1/2 -translate-y-1/2 h-0.5 bg-gray-100 -z-10"></div>
+          {[1, 2].map((num) => (
             <div
               key={num}
               className="flex flex-col items-center gap-1.5 bg-white px-2"
             >
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                  step >= num
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-400"
-                }`}
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${step >= num
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-400"
+                  }`}
               >
                 {num}
               </div>
               <span
                 className={`text-[10px] uppercase tracking-wider font-semibold ${step >= num ? "text-blue-600" : "text-gray-400"}`}
               >
-                {num === 1 ? "Info" : num === 2 ? "Profil" : "AI"}
+                {num === 1 ? "Info" : "Profil"}
               </span>
             </div>
           ))}
@@ -493,22 +490,6 @@ function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
                   ))}
                 </select>
               </Field>
-              <Field label="Tipe Pekerjaan">
-                <select
-                  value={form.remote_work_type}
-                  onChange={(e) => set("remote_work_type", e.target.value)}
-                  className={inputCls()}
-                >
-                  {REMOTE_TYPES.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
               <Field label="Industri">
                 <select
                   value={form.industry}
@@ -522,48 +503,22 @@ function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
                   ))}
                 </select>
               </Field>
-              <Field label="Ukuran Perusahaan">
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Tipe Pekerjaan">
                 <select
-                  value={form.company_size}
-                  onChange={(e) => set("company_size", e.target.value)}
+                  value={form.remote_work_type}
+                  onChange={(e) => set("remote_work_type", e.target.value)}
                   className={inputCls()}
                 >
-                  {COMPANY_SIZES.map((d) => (
+                  {REMOTE_TYPES.map((d) => (
                     <option key={d} value={d}>
                       {d}
                     </option>
                   ))}
                 </select>
               </Field>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Negara">
-                <select
-                  value={form.country}
-                  onChange={(e) => set("country", e.target.value)}
-                  className={inputCls()}
-                >
-                  {COUNTRIES.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Ukuran Tim (Jumlah Orang)">
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={form.team_size}
-                  onChange={(e) => set("team_size", Number(e.target.value))}
-                  className={inputCls()}
-                />
-              </Field>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
               <Field label="Pengalaman Kerja (Tahun)">
                 <input
                   type="number"
@@ -576,6 +531,9 @@ function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
                   className={inputCls()}
                 />
               </Field>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
               <Field label="Gaji Tahunan (USD k)">
                 <input
                   type="number"
@@ -583,162 +541,6 @@ function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
                   step="1"
                   value={form.salary_usd_k}
                   onChange={(e) => set("salary_usd_k", Number(e.target.value))}
-                  className={inputCls()}
-                />
-              </Field>
-            </div>
-          </div>
-        )}
-
-        {/* ================= STEP 3: METRIK AI ================= */}
-        {step === 3 && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Tools AI Utama">
-                <select
-                  value={form.primary_ai_tool}
-                  onChange={(e) => set("primary_ai_tool", e.target.value)}
-                  className={inputCls()}
-                >
-                  {AI_TOOLS.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Tahap Adopsi AI">
-                <select
-                  value={form.ai_adoption_stage}
-                  onChange={(e) => set("ai_adoption_stage", e.target.value)}
-                  className={inputCls()}
-                >
-                  {ADOPTION_STAGES.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Ketakutan Diganti AI">
-                <select
-                  value={form.fear_of_ai_replacement}
-                  onChange={(e) =>
-                    set("fear_of_ai_replacement", e.target.value)
-                  }
-                  className={inputCls()}
-                >
-                  {FEAR_LEVELS.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Skor Produktivitas (0-100)">
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="1"
-                  value={form.productivity_score}
-                  onChange={(e) =>
-                    set("productivity_score", Number(e.target.value))
-                  }
-                  className={inputCls()}
-                />
-              </Field>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Jam Pemakaian AI (Per Hari)">
-                <input
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={form.hours_with_ai_assistance_daily}
-                  onChange={(e) =>
-                    set(
-                      "hours_with_ai_assistance_daily",
-                      Number(e.target.value),
-                    )
-                  }
-                  className={inputCls()}
-                />
-              </Field>
-              <Field label="Tugas Diganti AI (%)">
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="1"
-                  value={form.ai_replaces_my_tasks_pct}
-                  onChange={(e) =>
-                    set("ai_replaces_my_tasks_pct", Number(e.target.value))
-                  }
-                  className={inputCls()}
-                />
-              </Field>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Jumlah Tools AI Per Hari">
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={form.ai_tools_used_per_day}
-                  onChange={(e) =>
-                    set("ai_tools_used_per_day", Number(e.target.value))
-                  }
-                  className={inputCls()}
-                />
-              </Field>
-              <Field label="Jam Belajar AI (Per Minggu)">
-                <input
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={form.weekly_ai_upskilling_hrs}
-                  onChange={(e) =>
-                    set("weekly_ai_upskilling_hrs", Number(e.target.value))
-                  }
-                  className={inputCls()}
-                />
-              </Field>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 border-t border-gray-100 pt-4 mt-2">
-              <Field
-                label="Estimasi Burnout Awal (0-100)"
-                hint="Diupdate via Daily Pulse"
-              >
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="1"
-                  value={form.burnout_score}
-                  onChange={(e) => set("burnout_score", Number(e.target.value))}
-                  className={inputCls()}
-                />
-              </Field>
-              <Field
-                label="Estimasi Kepuasan (1-5)"
-                hint="Diupdate via Daily Pulse"
-              >
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
-                  step="0.1"
-                  value={form.job_satisfaction_1_5}
-                  onChange={(e) =>
-                    set("job_satisfaction_1_5", Number(e.target.value))
-                  }
                   className={inputCls()}
                 />
               </Field>
@@ -770,7 +572,7 @@ function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
         </div>
 
         <div>
-          {step < 3 ? (
+          {step < 2 ? (
             <button
               type="button"
               onClick={handleNext}
@@ -778,10 +580,10 @@ function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
             >
               Lanjut <ChevronRight size={15} />
             </button>
-         ) : (
+          ) : (
             <button
-              type="button"  // 🔴 Ubah dari "submit" menjadi "button"
-              onClick={handleSubmit} // 🔴 Panggil fungsinya secara manual di sini
+              type="button"
+              onClick={handleSubmit}
               className="px-6 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm"
             >
               {mode === "add" ? "Simpan Data Karyawan" : "Simpan Perubahan"}
@@ -835,30 +637,30 @@ function sortRecords(rows: EmployeeRecord[], key: SortKey, dir: SortDir) {
 type ModalState =
   | { type: "none" }
   | { type: "add" }
-  | { type: "edit";   employee: EmployeeRecord }
+  | { type: "edit"; employee: EmployeeRecord }
   | { type: "delete"; employee: EmployeeRecord };
 
 export function EmployeesPage() {
-  const [records, setRecords]         = useState<EmployeeRecord[]>([]);
-  const [isLoading, setIsLoading]     = useState(true);
-  const [search, setSearch]           = useState("");
+  const [records, setRecords] = useState<EmployeeRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | Status>("All");
-  const [modal, setModal]             = useState<ModalState>({ type: "none" });
-  const [sortKey, setSortKey]         = useState<SortKey>("employeeId");
-  const [sortDir, setSortDir]         = useState<SortDir>("asc");
-  const [toast, setToast]             = useState<string | null>(null);
+  const [modal, setModal] = useState<ModalState>({ type: "none" });
+  const [sortKey, setSortKey] = useState<SortKey>("employeeId");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [toast, setToast] = useState<string | null>(null);
 
   // ── Fetch ──
   useEffect(() => {
     const load = async () => {
       try {
-        const res  = await fetch(`${API_URL}/api/employees`);
+        const res = await fetch(`${API_URL}/api/employees`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
         const mapped: EmployeeRecord[] = data.map((emp: any) => ({
           id: emp.id,
-          employeeId: `EMP-${String(emp.id).padStart(3, "0")}`,
+          employeeId: `${String(emp.id).padStart(3, "0")}`,
           name: emp.name,
           department: emp.department,
           role: emp.role,
@@ -928,10 +730,19 @@ export function EmployeesPage() {
 
   const handleAdd = async (data: FormState) => {
     try {
+      // Hitung ukuran tim secara otomatis berdasarkan jumlah karyawan di departemen yang sama
+      const countInDept = records.filter(r => r.department === data.department).length;
+      const dynamicTeamSize = Math.max(countInDept + 1, 1);
+
+      const dataToSend = {
+        ...data,
+        team_size: dynamicTeamSize
+      };
+
       const res = await fetch(`${API_URL}/api/employees`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(dataToSend),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const newEmp = await res.json();
@@ -941,7 +752,7 @@ export function EmployeesPage() {
 
       const formatted: EmployeeRecord = {
         id: newEmp.id,
-        employeeId: `EMP-${String(newEmp.id).padStart(3, "0")}`,
+        employeeId: `${String(newEmp.id).padStart(3, "0")}`,
         ...restData,
         status: newEmp.status ?? "Aktif",
         email: newEmp.email ?? data.email,
@@ -980,13 +791,13 @@ export function EmployeesPage() {
         r.map((e) =>
           e.id === id
             ? {
-                ...e,
-                ...restData,
-                status: updated.status ?? "Aktif",
-                email: updated.email ?? data.email,
-                joinDate: resolveJoinDate(updated),
-                authRole: (updated.auth_role as AuthRole) ?? "karyawan",
-              }
+              ...e,
+              ...restData,
+              status: updated.status ?? "Aktif",
+              email: updated.email ?? data.email,
+              joinDate: resolveJoinDate(updated),
+              authRole: (updated.auth_role as AuthRole) ?? "karyawan",
+            }
             : e,
         ),
       );
@@ -1017,12 +828,12 @@ export function EmployeesPage() {
 
   const SortIcon = ({ col }: { col: SortKey }) => (
     <span className="inline-flex flex-col ml-1 opacity-40">
-      <ChevronUp   size={10} className={sortKey === col && sortDir === "asc"  ? "opacity-100 text-blue-600" : ""} />
+      <ChevronUp size={10} className={sortKey === col && sortDir === "asc" ? "opacity-100 text-blue-600" : ""} />
       <ChevronDown size={10} className={sortKey === col && sortDir === "desc" ? "opacity-100 text-blue-600" : ""} style={{ marginTop: -3 }} />
     </span>
   );
 
-  const thCls    = "px-5 py-3.5 text-left text-xs text-gray-400 uppercase tracking-wider font-medium select-none";
+  const thCls = "px-5 py-3.5 text-left text-xs text-gray-400 uppercase tracking-wider font-medium select-none";
   const totalAktif = records.filter((r) => r.status === "Aktif").length;
 
   return (
@@ -1061,11 +872,10 @@ export function EmployeesPage() {
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
-                className={`px-3 py-2 text-xs rounded-lg font-medium transition-colors duration-150 whitespace-nowrap ${
-                  statusFilter === s
-                    ? "bg-blue-600 text-white"
-                    : "bg-white border border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600"
-                }`}
+                className={`px-3 py-2 text-xs rounded-lg font-medium transition-colors duration-150 whitespace-nowrap ${statusFilter === s
+                  ? "bg-blue-600 text-white"
+                  : "bg-white border border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600"
+                  }`}
               >
                 {s === "All" ? "Semua" : s}
               </button>

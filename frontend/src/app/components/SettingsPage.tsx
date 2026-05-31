@@ -1,5 +1,6 @@
 import { useState, useId } from "react";
-import { User, SlidersHorizontal, Check, Mail, UserCircle2, Lock, Loader2, Eye, EyeOff } from "lucide-react";
+import { User, SlidersHorizontal, Check, Mail, UserCircle2, Lock, Loader2, Eye, EyeOff, Cpu } from "lucide-react";
+import { AIProfileSurvey } from "./AIProfileSurvey";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
@@ -91,6 +92,7 @@ export function SettingsPage() {
   const employeeId    = localStorage.getItem("employee_id")    || "";
   const employeeName  = localStorage.getItem("employee_name")  || "";
   const employeeEmail = localStorage.getItem("employee_email") || "";
+  const role          = localStorage.getItem("role") || "";
 
   const [name, setName] = useState(employeeName);
 
@@ -267,6 +269,21 @@ export function SettingsPage() {
           </button>
         </div>
       </Section>
+
+      {/* ── Profil AI (Khusus Karyawan) ── */}
+      {role === "karyawan" && (
+        <Section
+          icon={<Cpu size={18} className="text-blue-600" />}
+          title="Profil Penggunaan AI"
+          description="Atur preferensi dan data pemakaian AI kamu"
+        >
+          {/* Karena AIProfileSurvey punya container dan title sendiri, kita re-use komponennya 
+              dengan menyembunyikan border/bayangan di CSS atau biarkan saja nested */}
+          <div className="-mx-8 -my-7">
+             <AIProfileSurvey />
+          </div>
+        </Section>
+      )}
 
       {/* ── Preferensi ── */}
       <Section

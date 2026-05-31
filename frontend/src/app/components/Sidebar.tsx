@@ -1,32 +1,46 @@
 import {
   LayoutDashboard, Users, TrendingUp, Settings,
-  Activity, HeartPulse, X,
+  Activity, HeartPulse, X, Calendar, Clock, FileText, Folder
 } from "lucide-react";
 
 interface SidebarProps {
-  activePage:   string;
-  onNavigate:   (page: string) => void;
-  role:         "hrd" | "karyawan";
+  activePage: string;
+  onNavigate: (page: string) => void;
+  role: "hrd" | "karyawan";
   employeeName: string;
-  onLogout:     () => void;
-  onClose?:     () => void;
+  onLogout: () => void;
+  onClose?: () => void;
 }
 
-const HRD_NAV = [
-  { id: "dashboard",   label: "Dashboard",  icon: LayoutDashboard, badge: null,       badgeStyle: "" },
-  { id: "dailypulse",  label: "Daily Pulse", icon: HeartPulse,     badge: "Hari ini", badgeStyle: "bg-emerald-500/15 text-emerald-400" },
-  { id: "employees",   label: "Karyawan",   icon: Users,           badge: null,       badgeStyle: "" },
-  { id: "predictions", label: "Prediksi",   icon: TrendingUp,      badge: "AI",       badgeStyle: "bg-violet-500/15 text-violet-400" },
-  { id: "settings",    label: "Pengaturan", icon: Settings,        badge: null,       badgeStyle: "" },
+const HRD_NAV_GROUPS = [
+  {
+    group: "General",
+    items: [
+      { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, badge: null, badgeStyle: "" },
+      { id: "ourteams", label: "Our Teams", icon: Users, badge: null, badgeStyle: "" },
+      { id: "employees", label: "Employees", icon: Users, badge: null, badgeStyle: "" },
+      { id: "attendance", label: "Attendance", icon: Calendar, badge: null, badgeStyle: "" },
+      { id: "projects", label: "Projects", icon: Folder, badge: "Soon", badgeStyle: "bg-blue-500/15 text-blue-400" },
+    ]
+  },
+  {
+    group: "Others",
+    items: [
+      { id: "predictions", label: "Predictions", icon: TrendingUp, badge: "AI", badgeStyle: "bg-violet-500/15 text-violet-400" },
+      { id: "settings", label: "Settings", icon: Settings, badge: null, badgeStyle: "" },
+    ]
+  }
 ];
 
 const KARYAWAN_NAV = [
-  { id: "dailypulse", label: "Daily Pulse", icon: HeartPulse, badge: "Hari ini", badgeStyle: "bg-emerald-500/15 text-emerald-400" },
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, badge: null, badgeStyle: "" },
+  { id: "projects", label: "Projects", icon: Folder, badge: "Soon", badgeStyle: "bg-blue-500/15 text-blue-400" },
+  { id: "myattendances", label: "My Attendance", icon: FileText, badge: null, badgeStyle: "" },
+  { id: "clockinout", label: "Clock In/Out", icon: Clock, badge: null, badgeStyle: "" },
+  { id: "myteam", label: "My Team", icon: Users, badge: null, badgeStyle: "" },
 ];
 
 export function Sidebar({ activePage, onNavigate, role, onClose }: SidebarProps) {
-  const navItems = role === "hrd" ? HRD_NAV : KARYAWAN_NAV;
-
   return (
     <div className="flex flex-col h-full w-60 bg-slate-900 select-none">
 
@@ -53,45 +67,87 @@ export function Sidebar({ activePage, onNavigate, role, onClose }: SidebarProps)
 
       {/* Navigation */}
       <nav className="flex-1 px-3 overflow-y-auto">
-        <p className="px-2 mb-2.5 text-[10px] font-semibold text-slate-600 uppercase tracking-widest">
-          Menu
-        </p>
-        <ul className="space-y-0.5">
-          {navItems.map(({ id, label, icon: Icon, badge, badgeStyle }) => {
-            const isActive = activePage === id;
-            return (
-              <li key={id}>
-                <button
-                  onClick={() => onNavigate(id)}
-                  className={`
-                    w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-                    transition-all duration-150 group
-                    ${isActive
-                      ? "bg-blue-600 text-white shadow-sm shadow-blue-900/50"
-                      : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
-                    }
-                  `}
-                >
-                  <Icon
-                    size={16}
-                    className={`flex-shrink-0 transition-colors ${
-                      isActive ? "text-white" : "text-slate-500 group-hover:text-slate-300"
-                    }`}
-                    strokeWidth={isActive ? 2.2 : 1.8}
-                  />
-                  <span className="flex-1 text-left font-medium">{label}</span>
-                  {badge && (
-                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${
-                      isActive ? "bg-white/20 text-white" : badgeStyle
-                    }`}>
-                      {badge}
-                    </span>
-                  )}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+        {role === "hrd" ? (
+          <div className="space-y-6">
+            {HRD_NAV_GROUPS.map((g, idx) => (
+              <div key={idx}>
+                <p className="px-2 mb-2.5 text-[10px] font-semibold text-slate-600 uppercase tracking-widest">
+                  {g.group}
+                </p>
+                <ul className="space-y-0.5">
+                  {g.items.map(({ id, label, icon: Icon, badge, badgeStyle }) => {
+                    const isActive = activePage === id;
+                    return (
+                      <li key={id}>
+                        <button
+                          onClick={() => onNavigate(id)}
+                          className={`
+                            w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
+                            transition-all duration-150 group
+                            ${isActive
+                              ? "bg-blue-600 text-white shadow-sm shadow-blue-900/50"
+                              : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                            }
+                          `}
+                        >
+                          <Icon
+                            size={16}
+                            className={`flex-shrink-0 transition-colors ${isActive ? "text-white" : "text-slate-500 group-hover:text-slate-300"}`}
+                            strokeWidth={isActive ? 2.2 : 1.8}
+                          />
+                          <span className="flex-1 text-left font-medium">{label}</span>
+                          {badge && (
+                            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${isActive ? "bg-white/20 text-white" : badgeStyle}`}>
+                              {badge}
+                            </span>
+                          )}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div>
+            <p className="px-2 mb-2.5 text-[10px] font-semibold text-slate-600 uppercase tracking-widest">
+              Menu
+            </p>
+            <ul className="space-y-0.5">
+              {KARYAWAN_NAV.map(({ id, label, icon: Icon, badge, badgeStyle }) => {
+                const isActive = activePage === id;
+                return (
+                  <li key={id}>
+                    <button
+                      onClick={() => onNavigate(id)}
+                      className={`
+                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
+                        transition-all duration-150 group
+                        ${isActive
+                          ? "bg-blue-600 text-white shadow-sm shadow-blue-900/50"
+                          : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                        }
+                      `}
+                    >
+                      <Icon
+                        size={16}
+                        className={`flex-shrink-0 transition-colors ${isActive ? "text-white" : "text-slate-500 group-hover:text-slate-300"}`}
+                        strokeWidth={isActive ? 2.2 : 1.8}
+                      />
+                      <span className="flex-1 text-left font-medium">{label}</span>
+                      {badge && (
+                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${isActive ? "bg-white/20 text-white" : badgeStyle}`}>
+                          {badge}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
       </nav>
 
       {/* Footer branding */}

@@ -42,6 +42,15 @@ const TRUST_ITEMS = [
   "14-day free trial",
 ];
 
+const TEAM_MEMBERS = [
+  { name: "Nama Anggota 1", role: "Project Manager", desc: "Memimpin strategi dan eksekusi.", avatar: "A1", avatarBg: "from-blue-400 to-blue-600" },
+  { name: "Nama Anggota 2", role: "UI/UX Designer",  desc: "Merancang antarmuka pengguna.", avatar: "A2", avatarBg: "from-violet-400 to-purple-600" },
+  { name: "Nama Anggota 3", role: "Frontend Dev",    desc: "Membangun tampilan interaktif.",avatar: "A3", avatarBg: "from-emerald-400 to-emerald-600" },
+  { name: "Nama Anggota 4", role: "Backend Dev",     desc: "Mengelola arsitektur server.",  avatar: "A4", avatarBg: "from-orange-400 to-red-500" },
+  { name: "Nama Anggota 5", role: "AI Engineer",     desc: "Melatih model machine learning.",avatar: "A5", avatarBg: "from-pink-400 to-rose-600" },
+  { name: "Nama Anggota 6", role: "DevOps Engineer", desc: "Memastikan infrastruktur stabil.", avatar: "A6", avatarBg: "from-cyan-400 to-blue-500" },
+];
+
 export function LandingPage() {
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif" }}>
@@ -59,7 +68,7 @@ export function LandingPage() {
           </div>
 
           <nav className="hidden md:flex items-center gap-8">
-            {["Features", "Solutions"].map((link) => (
+            {["Features", "Solutions", "About"].map((link) => (
               <a key={link} href={`#${link.toLowerCase()}`}
                 className="text-gray-500 hover:text-[#0f1f3d] transition-colors"
                 style={{ fontSize: "0.9rem", fontWeight: 500 }}>
@@ -295,6 +304,36 @@ export function LandingPage() {
                 Live AI risk predictions — updated on every check-in
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ABOUT (TEAM) */}
+      <section id="about" className="py-24 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-[#2563eb] mb-3" style={{ fontSize: "0.82rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              Our Team
+            </p>
+            <h2 className="text-[#0f1f3d] mb-4" style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.25rem)", fontWeight: 800, letterSpacing: "-0.02em" }}>
+              Meet the Developers
+            </h2>
+            <p className="text-gray-500 max-w-2xl mx-auto" style={{ fontSize: "1rem", lineHeight: 1.7 }}>
+              Kami adalah tim beranggotakan 6 orang di balik StayPath AI. Kami menggabungkan keahlian di bidang AI, rekayasa perangkat lunak, dan desain untuk menciptakan solusi HR modern.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {TEAM_MEMBERS.map((member) => (
+              <div key={member.name} className="flex flex-col items-center text-center p-6 border border-gray-100 rounded-3xl bg-gray-50/50 hover:bg-white hover:shadow-xl hover:shadow-gray-100/50 transition-all">
+                <div className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${member.avatarBg} flex items-center justify-center mb-5 shadow-sm transform -rotate-3 hover:rotate-0 transition-transform`}>
+                  <span className="text-white text-2xl font-bold">{member.avatar}</span>
+                </div>
+                <h3 className="text-gray-900 font-bold text-lg">{member.name}</h3>
+                <p className="text-[#2563eb] text-sm font-semibold mb-3">{member.role}</p>
+                <p className="text-gray-500 text-sm leading-relaxed">{member.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

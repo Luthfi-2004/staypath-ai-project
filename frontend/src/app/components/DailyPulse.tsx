@@ -26,84 +26,113 @@ const greeting = (() => {
   return "Selamat malam";
 })();
 
-type Status = "idle" | "submitting" | "done" | "already_submitted" | "error";
+type Status = "idle" | "submitting" | "done" | "error";
+type AttendanceState = "loading" | "needs_clock_in" | "needs_clock_out" | "done";
 
 export function DailyPulse() {
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
   const [workload, setWorkload]         = useState(3);
   const [note, setNote]                 = useState("");
   const [status, setStatus]             = useState<Status>("idle");
-  const [employeeStatus, setEmployeeStatus] = useState("");
+  const [attendanceState, setAttendanceState] = useState<AttendanceState>("loading");
+  const [clockInTime, setClockInTime]   = useState<string | null>(null);
 
-  // Ambil data employee dari auth context/localStorage (disimpan saat login)
-  const employeeId = parseInt(localStorage.getItem("employee_id") || "0");
+  const employeeId = localStorage.getItem("employee_id") || "";
   const employeeName = localStorage.getItem("employee_name") || "Karyawan";
 
   useEffect(() => {
-    // 1. Ambil status bawaan dari localStorage (buat jaga-jaga kalau internet lelet)
-    const storedStatus = localStorage.getItem("employee_status") || "Aktif";
-    setEmployeeStatus(storedStatus);
+    if (!employeeId) return;
 
-    // 2. Langsung nanya ke server, status TERBARU gw sekarang apa?
-    if (employeeId) {
-      fetch(`${API_URL}/api/auth/me/${employeeId}`)
-        .then((res) => {
-          if (!res.ok) throw new Error();
-          return res.json();
-        })
-        .then((data) => {
-          // Kalau status di server beda, update layarnya!
-          if (data.status) {
-            setEmployeeStatus(data.status);
-            // Update juga localStorage biar sinkron
-            localStorage.setItem("employee_status", data.status);
+    // Fetch attendance history to check today's status
+    const fetchAttendance = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/attendance/history/${employeeId}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todayAtt = data.find((a: any) => a.date === todayStr);
+
+        if (!todayAtt) {
+          setAttendanceState("needs_clock_in");
+        } else if (!todayAtt.clock_out_time) {
+          setAttendanceState("needs_clock_out");
+          if (todayAtt.clock_in_time) {
+            setClockInTime(new Date(todayAtt.clock_in_time).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' }));
           }
-        })
-        .catch(() => {
-          console.warn("Gagal mengecek status terbaru ke server.");
-        });
-    }
+        } else {
+          setAttendanceState("done");
+        }
+      } catch (err) {
+        console.error("Gagal mengambil status absensi");
+        setAttendanceState("needs_clock_in");
+      }
+    };
+
+    fetchAttendance();
   }, [employeeId]);
 
-  const handleSubmit = async () => {
+  const handleClockIn = async () => {
+    setStatus("submitting");
+    try {
+      const res = await fetch(`${API_URL}/api/attendance/clock-in`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employee_id: employeeId }),
+      });
+      if (!res.ok) throw new Error("Gagal clock in");
+      
+      const data = await res.json();
+      setClockInTime(new Date(data.clock_in_time).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' }));
+      setAttendanceState("needs_clock_out");
+      setStatus("idle");
+    } catch (err) {
+      console.error(err);
+      setStatus("error");
+    }
+  };
+
+  const handleClockOut = async () => {
     if (selectedMood === null || !employeeId) return;
     setStatus("submitting");
 
     try {
-      const res = await fetch(`${API_URL}/api/pulse`, {
-        method:  "POST",
+      const res = await fetch(`${API_URL}/api/attendance/clock-out`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          employee_id:    employeeId,
-          mood_score:     selectedMood,
-          workload_score: workload,
-          note:           note.trim() || null,
+          employee_id: employeeId,
+          mood_score: selectedMood,
+          notes: note.trim() || `Workload: ${workloadLabels[workload].label}`,
         }),
       });
 
-      if (res.status === 409) {
-        setStatus("already_submitted");
-        return;
-      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setAttendanceState("done");
       setStatus("done");
     } catch (err) {
-      console.error("Gagal submit pulse:", err);
+      console.error("Gagal submit clock out:", err);
       setStatus("error");
     }
   };
 
   const handleReset = () => {
-    setSelectedMood(null);
-    setWorkload(3);
-    setNote("");
     setStatus("idle");
   };
 
   const workloadInfo = workloadLabels[workload];
 
+  // ── Loading ──
+  if (attendanceState === "loading") {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+      </div>
+    );
+  }
+
   // ── Already submitted ──
-  if (status === "already_submitted") {
+  if (attendanceState === "done") {
     return (
       <div className="max-w-lg mx-auto py-10 text-center">
         <div className="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
@@ -124,16 +153,7 @@ export function DailyPulse() {
           <CheckCircle className="w-8 h-8 text-emerald-500" />
         </div>
         <h2 className="text-gray-800 font-semibold text-lg mb-2">Check-in tersimpan!</h2>
-        <p className="text-gray-400 text-sm mb-1">
-          Mood kamu hari ini: <span className="font-medium text-gray-600">{mood?.emoji} {mood?.label}</span>
-        </p>
-        <p className="text-gray-400 text-sm mb-6">Beban kerja: <span className={`font-medium ${workloadInfo.color}`}>{workloadInfo.label}</span></p>
-        <button
-          onClick={handleReset}
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-        >
-          Isi ulang ↺
-        </button>
+        <p className="text-gray-400 text-sm mb-6">Terima kasih atas kerja kerasmu hari ini.</p>
       </div>
     );
   }
@@ -148,33 +168,44 @@ export function DailyPulse() {
     );
   }
 
-  // ── Form ──
+  // ── Needs Clock In ──
+  if (attendanceState === "needs_clock_in") {
+    return (
+      <div className="max-w-lg mx-auto py-16 text-center">
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm px-8 py-10">
+          <h1 className="text-gray-900 text-2xl font-semibold mb-2">Absensi Kehadiran</h1>
+          <p className="text-gray-500 text-sm mb-8">Silakan Clock-In untuk memulai jam kerjamu hari ini.</p>
+          
+          <button
+            onClick={handleClockIn}
+            disabled={status === "submitting"}
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-white font-bold text-lg bg-blue-600 hover:bg-blue-700 shadow-md transition-all active:scale-95"
+          >
+            {status === "submitting" ? <Loader2 className="w-5 h-5 animate-spin" /> : "🕒 Clock In Sekarang"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Clock Out Form (Daily Pulse) ──
   return (
     <div className="max-w-lg mx-auto">
-      
-      {/* 🌟 BANNER NOTIFIKASI JADWAL 1-ON-1 🌟 */}
-      {employeeStatus === 'Dijadwalkan' && (
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-xl shadow-sm flex items-start animate-fade-in">
-          <AlertCircle className="h-6 w-6 text-blue-500 mr-3 mt-0.5 flex-shrink-0" />
-          <div>
-            <h3 className="text-blue-800 font-semibold text-lg">Undangan Sesi 1-on-1</h3>
-            <p className="text-blue-700 text-sm mt-1 leading-relaxed">
-              Tim HRD ingin menjadwalkan sesi ngobrol santai dengan Anda berdasarkan hasil evaluasi rutin. Silakan cek email Anda untuk detail jadwal atau hubungi tim HRD.
-            </p>
-          </div>
-        </div>
-      )}
-
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm px-8 py-8 mb-4">
 
         {/* Header */}
         <div className="mb-8">
           <p className="text-gray-400 text-sm mb-1">{greeting}, <span className="text-gray-600 font-medium">{employeeName}</span></p>
-          <h1 className="text-gray-900 text-2xl font-semibold tracking-tight leading-tight">
-            How are you feeling today?
-          </h1>
-          <p className="text-gray-400 text-sm mt-1.5">
-            {new Date().toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+          <div className="flex items-center justify-between">
+            <h1 className="text-gray-900 text-2xl font-semibold tracking-tight leading-tight">
+              Waktunya Clock Out
+            </h1>
+            <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">
+              In: {clockInTime}
+            </span>
+          </div>
+          <p className="text-gray-400 text-sm mt-2">
+            Sebelum mengakhiri pekerjaan hari ini, beri tahu kami bagaimana harimu.
           </p>
         </div>
 
@@ -252,7 +283,7 @@ export function DailyPulse() {
 
         {/* Submit */}
         <button
-          onClick={handleSubmit}
+          onClick={handleClockOut}
           disabled={selectedMood === null || status === "submitting"}
           className={`
             w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-200
@@ -265,12 +296,7 @@ export function DailyPulse() {
           {status === "submitting" ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> Menyimpan…</>
           ) : (
-            <>
-              Submit Check-in
-              {selectedMood !== null && (
-                <span className="text-base">{moods.find((m) => m.value === selectedMood)?.emoji}</span>
-              )}
-            </>
+            <>Submit & Clock Out</>
           )}
         </button>
 

@@ -5,11 +5,11 @@ import { Activity, Loader2, AlertCircle, Mail, Lock } from "lucide-react";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 export function LoginPage() {
-  const navigate            = useNavigate();
-  const [email, setEmail]   = useState("");
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
   const [password, setPass] = useState("");
-  const [error, setError]   = useState("");
-  const [loading, setLoad]  = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoad] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,8 +22,8 @@ export function LoginPage() {
 
     setLoad(true);
     try {
-      const res  = await fetch(`${API_URL}/api/auth/login`, {
-        method:  "POST",
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
@@ -36,18 +36,18 @@ export function LoginPage() {
       }
 
       // Simpan session
-      localStorage.setItem("employee_id",    String(data.id));
-      localStorage.setItem("employee_name",  data.name);
+      localStorage.setItem("employee_id", String(data.id));
+      localStorage.setItem("employee_name", data.name);
       localStorage.setItem("employee_email", data.email);
-      localStorage.setItem("role",           data.auth_role);
-      
+      localStorage.setItem("role", data.auth_role);
+
       localStorage.setItem("employee_status", data.status || "Aktif");
 
       // Arahkan berdasarkan role dari DB
       if (data.auth_role === "hrd") {
         navigate("/dashboard");
       } else {
-        navigate("/dashboard/dailypulse");
+        navigate("/dashboard");
       }
 
     } catch {
