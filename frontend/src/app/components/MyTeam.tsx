@@ -41,7 +41,7 @@ export function MyTeam() {
   }, [employeeId]);
 
   if (loading) {
-    return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-blue-600 animate-spin" /></div>;
+    return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-slate-900 animate-spin" /></div>;
   }
 
   if (!team) {
@@ -71,7 +71,7 @@ export function MyTeam() {
 
       {/* Top Banner */}
       <div className="bg-white border border-slate-200 rounded-3xl p-8 mb-6 shadow-sm flex items-center gap-6">
-        <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-600/30">
+        <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg shadow-slate-900/30">
           <Users size={40} />
         </div>
         <div>
@@ -94,7 +94,7 @@ export function MyTeam() {
           <div>
             <div className="flex justify-between items-start mb-4">
               <p className="text-sm font-semibold text-slate-700">Active Members</p>
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-xl"><Users size={18} /></div>
+              <div className="p-2 bg-slate-100 text-slate-900 rounded-xl"><Users size={18} /></div>
             </div>
             <h3 className="text-3xl font-bold text-slate-800">{team.members?.length || 0}</h3>
           </div>
@@ -140,19 +140,19 @@ export function MyTeam() {
       <div className="flex gap-3 mb-8 overflow-x-auto pb-2 scrollbar-hide">
         <button 
           onClick={() => setActiveTab("members")}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition ${activeTab === 'members' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition ${activeTab === 'members' ? 'bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
         >
           <Users size={16} /> Members
         </button>
         <button 
           onClick={() => setActiveTab("projects")}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition ${activeTab === 'projects' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition ${activeTab === 'projects' ? 'bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
         >
           <Folder size={16} /> Projects
         </button>
         <button 
           onClick={() => setActiveTab("description")}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition ${activeTab === 'description' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition ${activeTab === 'description' ? 'bg-slate-900 text-white shadow-md shadow-slate-900/20' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
         >
           <BookOpen size={16} /> Description
         </button>
@@ -165,7 +165,7 @@ export function MyTeam() {
           <div className="animate-in fade-in">
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-1">
-                <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg"><Users size={16} /></div>
+                <div className="p-1.5 bg-slate-200 text-slate-900 rounded-lg"><Users size={16} /></div>
                 <h3 className="text-lg font-bold text-slate-800">Team Members</h3>
               </div>
               <p className="text-sm text-slate-500 ml-9">Current team composition</p>
@@ -182,7 +182,7 @@ export function MyTeam() {
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white shadow-sm" title="Online"></span>
                   </div>
                   <h4 className="font-bold text-slate-800 truncate" title={member.name}>{member.name}</h4>
-                  <p className="text-xs font-semibold text-blue-600 mt-1">{member.role || "Team Member"}</p>
+                  <p className="text-xs font-semibold text-slate-900 mt-1">{member.role || "Team Member"}</p>
                 </div>
               ))}
               {(!team.members || team.members.length === 0) && (

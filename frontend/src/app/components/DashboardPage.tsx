@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Loader2, Users, Calendar, AlertTriangle, Smile, Plus, FileText, Search, Clock, ArrowRight } from "lucide-react";
+import { Loader2, Users, Calendar, AlertTriangle, Smile, Plus, Search } from "lucide-react";
 import { ResignationChart } from "./ResignationChart";
 import { EmployeeTable } from "./EmployeeTable";
 import { Modal, EmployeeForm, emptyForm, FormState, DEPARTMENTS } from "./EmployeesPage";
@@ -10,7 +10,6 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 export function DashboardPage({ onNavigate }: { onNavigate?: (path: string) => void }) {
   const [stats, setStats] = useState<any>(null);
-  const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Modals state
@@ -27,12 +26,8 @@ export function DashboardPage({ onNavigate }: { onNavigate?: (path: string) => v
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [resStats, resEmp] = await Promise.all([
-          fetch(`${API_URL}/api/dashboard/stats`),
-          fetch(`${API_URL}/api/employees`)
-        ]);
+        const resStats = await fetch(`${API_URL}/api/dashboard/stats`);
         if (resStats.ok) setStats(await resStats.json());
-        if (resEmp.ok) setEmployees(await resEmp.json());
       } catch (err) {
         console.error(err);
       } finally {
@@ -60,17 +55,17 @@ export function DashboardPage({ onNavigate }: { onNavigate?: (path: string) => v
   };
 
   if (loading) {
-    return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-blue-600 animate-spin" /></div>;
+    return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-slate-900 animate-spin" /></div>;
   }
 
-  const filteredEmployees = stats?.latestEmployees?.filter((emp: any) => {
+  const filteredEmployees = (stats?.latestEmployees || []).filter((emp: any) => {
     const q = searchQuery.toLowerCase();
     const matchSearch = emp.name?.toLowerCase().includes(q) || emp.role?.toLowerCase().includes(q);
     const matchStatus = statusFilter === "All Status" || emp.status === statusFilter;
     return matchSearch && matchStatus;
-  }) || [];
+  });
 
-  const filteredTeams = stats?.latestTeams?.filter((team: any) => {
+  const filteredTeams = (stats?.latestTeams || []).filter((team: any) => {
     const q = searchQuery.toLowerCase();
     const matchSearch = team.name?.toLowerCase().includes(q) || team.department?.toLowerCase().includes(q);
     const matchDept = deptFilter === "All Departments" || team.department === deptFilter;
@@ -120,7 +115,7 @@ export function DashboardPage({ onNavigate }: { onNavigate?: (path: string) => v
           <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
             <div className="flex justify-between items-start">
               <p className="text-sm font-semibold text-slate-700">Total Teams</p>
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-xl"><Users size={18} /></div>
+              <div className="p-2 bg-slate-100 text-slate-900 rounded-xl"><Users size={18} /></div>
             </div>
             <div>
               <h3 className="text-3xl font-bold text-slate-800">{stats?.totalTeams || 0}</h3>
@@ -176,16 +171,13 @@ export function DashboardPage({ onNavigate }: { onNavigate?: (path: string) => v
         <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col">
           <h3 className="font-bold text-slate-800 mb-4">Quick Actions</h3>
           <div className="space-y-3 flex-1">
-            <button onClick={() => setShowAddEmp(true)} className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition">
+            <button onClick={() => setShowAddEmp(true)} className="w-full flex items-center justify-center gap-2 py-3 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition">
               <Plus size={16} /> Add Employee
             </button>
-            <button onClick={() => setShowAddTeam(true)} className="w-full flex items-center justify-center gap-2 py-3 bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-sm font-semibold hover:bg-slate-100 transition">
+            <button onClick={() => setShowAddTeam(true)} className="w-full flex items-center justify-center gap-2 py-3 bg-white text-slate-700 border border-slate-200 rounded-xl text-sm font-semibold hover:bg-slate-50 transition shadow-sm">
               <Users size={16} /> Create New Team
             </button>
-            {/* <button onClick={() => onNavigate && onNavigate("payroll")} className="w-full flex items-center justify-center gap-2 py-3 bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-sm font-semibold hover:bg-slate-100 transition">
-              <FileText size={16} /> Process Payroll
-            </button> */}
-            <button onClick={() => setShowMeeting(true)} className="w-full flex items-center justify-center gap-2 py-3 bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-sm font-semibold hover:bg-slate-100 transition">
+            <button onClick={() => setShowMeeting(true)} className="w-full flex items-center justify-center gap-2 py-3 bg-white text-slate-700 border border-slate-200 rounded-xl text-sm font-semibold hover:bg-slate-50 transition shadow-sm">
               <Calendar size={16} /> Schedule Meeting
             </button>
           </div>
@@ -202,19 +194,19 @@ export function DashboardPage({ onNavigate }: { onNavigate?: (path: string) => v
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search employees or teams..."
-            className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
           />
         </div>
         <div className="flex gap-3">
-          <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} className="px-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} className="px-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900">
             <option value="All Departments">All Departments</option>
             {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
-          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900">
             <option value="All Status">All Status</option>
-            <option value="Aktif">Aktif</option>
-            <option value="Cuti">Cuti</option>
-            <option value="Nonaktif">Nonaktif</option>
+            <option value="Active">Active</option>
+            <option value="Leave">Leave</option>
+            <option value="Inactive">Inactive</option>
           </select>
         </div>
       </div>
@@ -230,15 +222,15 @@ export function DashboardPage({ onNavigate }: { onNavigate?: (path: string) => v
               <div key={emp.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl">
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-slate-200 text-blue-700 font-bold flex items-center justify-center">
                       {(emp.name || "").substring(0, 2).toUpperCase()}
                     </div>
-                    {emp.status === 'Aktif' && <div className="absolute bottom-0 right-0 w-3 h-3 border-2 border-white bg-emerald-500 rounded-full"></div>}
+                    {emp.status === 'Active' && <div className="absolute bottom-0 right-0 w-3 h-3 border-2 border-white bg-emerald-500 rounded-full"></div>}
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
                       {emp.name}
-                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] rounded-md font-bold">{emp.role}</span>
+                      <span className="px-2 py-0.5 bg-slate-200 text-blue-700 text-[10px] rounded-md font-bold">{emp.role}</span>
                     </h4>
                     <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
                       {emp.role} •
@@ -265,7 +257,7 @@ export function DashboardPage({ onNavigate }: { onNavigate?: (path: string) => v
           <h3 className="font-bold text-slate-800 mb-6 text-lg">Latest Teams</h3>
           <div className="space-y-4">
             {filteredTeams.map((team: any, i: number) => {
-              const colors = ["bg-blue-600", "bg-indigo-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500"];
+              const colors = ["bg-slate-900", "bg-indigo-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500"];
               const colorClass = colors[i % colors.length];
               return (
                 <div key={team.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl">
@@ -301,7 +293,7 @@ export function DashboardPage({ onNavigate }: { onNavigate?: (path: string) => v
       <div className="pt-8 border-t border-slate-200 mt-8 space-y-6">
         <h2 className="text-xl font-bold text-slate-800 mb-4">Deep Analytics (Legacy)</h2>
         <ResignationChart />
-        <EmployeeTable employees={employees} onIntervene={() => { }} />
+        <EmployeeTable />
       </div>
 
       {showAddEmp && (

@@ -3,7 +3,7 @@ import { Loader2, Plus, Calendar } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
-export function LeaveRequestKaryawan() {
+export function LeaveRequestEmployee() {
   const [leaves, setLeaves] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -70,45 +70,53 @@ export function LeaveRequestKaryawan() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Pengajuan Cuti</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Leave Request</h1>
           <p className="text-sm text-gray-500 mt-1">Kelola dan pantau status cuti Anda.</p>
         </div>
         {!showForm && (
-          <button onClick={() => setShowForm(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition">
-            <Plus className="w-4 h-4" /> Ajukan Cuti
+          <button onClick={() => setShowForm(true)} className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition">
+            <Plus className="w-4 h-4" /> Ajukan Leave
           </button>
         )}
       </div>
 
       {showForm && (
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Form Pengajuan Cuti</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Form Leave Request</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tgl Mulai</label>
-                <input required type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-100" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tgl Start</label>
+                <input required type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-slate-200" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tgl Selesai</label>
-                <input required type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-100" />
+                <input required type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-slate-200" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Total Days</label>
+                <div className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 font-bold h-[38px] flex items-center">
+                  {startDate && endDate && new Date(endDate) >= new Date(startDate) ? (
+                    `${Math.ceil(Math.abs(new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1} Days`
+                  ) : "-"}
+                </div>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Jenis Cuti</label>
-              <select value={leaveType} onChange={e => setLeaveType(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-100">
-                <option value="Tahunan">Cuti Tahunan</option>
-                <option value="Sakit">Sakit</option>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Leave Type</label>
+              <select value={leaveType} onChange={e => setLeaveType(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-slate-200">
+                <option value="Tahunan">Annual Leave</option>
+                <option value="Sakit">Sick Leave</option>
                 <option value="Penting">Keperluan Penting</option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Alasan</label>
-              <textarea required rows={2} value={reason} onChange={e => setReason(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-100"></textarea>
+              <textarea required rows={2} value={reason} onChange={e => setReason(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-slate-200"></textarea>
             </div>
             <div className="flex gap-2 justify-end mt-4">
-              <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg font-medium">Batal</button>
-              <button type="submit" disabled={submitting} className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2">
+              <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg font-medium">Cancel</button>
+              <button type="submit" disabled={submitting} className="px-4 py-2 text-sm bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 flex items-center gap-2">
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Kirim Pengajuan"}
               </button>
             </div>
@@ -118,21 +126,23 @@ export function LeaveRequestKaryawan() {
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-blue-500" />
-          <h3 className="font-semibold text-gray-800">Riwayat Cuti</h3>
+          <Calendar className="w-5 h-5 text-slate-900" />
+          <h3 className="font-semibold text-gray-800">Riwayat Leave</h3>
         </div>
         {loading ? (
-          <div className="p-8 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-blue-600" /></div>
+          <div className="p-8 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-slate-900" /></div>
         ) : leaves.length === 0 ? (
-          <div className="p-8 text-center text-gray-500 text-sm">Belum ada riwayat cuti.</div>
+          <div className="p-8 text-center text-gray-500 text-sm">No leave history yet.</div>
         ) : (
           <div className="divide-y divide-gray-50">
             {leaves.map((l: any) => (
               <div key={l.id} className="p-4 px-6 flex justify-between items-center hover:bg-gray-50 transition">
                 <div>
                   <p className="text-sm font-semibold text-gray-800">{l.leave_type}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{new Date(l.start_date).toLocaleDateString("id-ID")} - {new Date(l.end_date).toLocaleDateString("id-ID")}</p>
-                  <p className="text-xs text-gray-400 mt-1 italic">"{l.reason}"</p>
+                  <div className="mt-2 inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-600 border border-gray-200">
+                    Total Leave: {Math.ceil(Math.abs(new Date(l.end_date).getTime() - new Date(l.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1} Days
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2 italic">"{l.reason}"</p>
                 </div>
                 <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                   l.status === 'Approved' ? 'bg-emerald-100 text-emerald-700' : 

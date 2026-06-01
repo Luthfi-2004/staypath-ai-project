@@ -56,7 +56,7 @@ export function TeamsHR() {
   }, [data, searchQuery, deptFilter, sortOrder]);
 
   if (loading) {
-    return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-blue-600 animate-spin" /></div>;
+    return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-slate-900 animate-spin" /></div>;
   }
 
   if (selectedTeamId) {
@@ -73,7 +73,7 @@ export function TeamsHR() {
           <h1 className="text-2xl font-bold text-slate-800">Our Teams</h1>
           <p className="text-slate-500 text-sm mt-1">Manage and monitor departmental team structures</p>
         </div>
-        <button onClick={() => setShowAddTeam(true)} className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-2">
+        <button onClick={() => setShowAddTeam(true)} className="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition flex items-center gap-2">
           <Plus size={16} /> Create New Team
         </button>
       </div>
@@ -81,7 +81,7 @@ export function TeamsHR() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Teams", value: data?.totalTeams || 0, icon: Building2, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "Total Teams", value: data?.totalTeams || 0, icon: Building2, color: "text-slate-900", bg: "bg-slate-100" },
           { label: "Total Employees", value: data?.totalEmployees || 0, icon: Users, color: "text-indigo-600", bg: "bg-indigo-50" },
           { label: "Open Roles", value: data?.openRoles || 0, icon: Briefcase, color: "text-amber-600", bg: "bg-amber-50" },
           { label: "Active Projects", value: data?.activeProjects || 0, icon: Folder, color: "text-emerald-600", bg: "bg-emerald-50" },
@@ -107,11 +107,11 @@ export function TeamsHR() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search teams by name, department, or manager..." 
-            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
           />
         </div>
         <div className="flex gap-3">
-          <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} className="px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} className="px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900">
             <option value="All Departments">All Departments</option>
             <option value="Engineering">Engineering</option>
             <option value="Product">Product</option>
@@ -120,7 +120,7 @@ export function TeamsHR() {
             <option value="Sales">Sales</option>
             <option value="Human Resources">Human Resources</option>
           </select>
-          <select value={sortOrder} onChange={e => setSortOrder(e.target.value)} className="px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <select value={sortOrder} onChange={e => setSortOrder(e.target.value)} className="px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900">
             <option value="Sort by: Performance">Sort by: Performance</option>
             <option value="Sort by: Size">Sort by: Size</option>
           </select>
@@ -135,7 +135,7 @@ export function TeamsHR() {
             {/* Card Header */}
             <div className="p-6 border-b border-slate-50 flex items-start justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 border border-blue-100">
+                <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-900 flex items-center justify-center flex-shrink-0 border border-slate-200">
                   <Building2 size={24} />
                 </div>
                 <div>
@@ -190,7 +190,7 @@ export function TeamsHR() {
                   <p className="text-xs text-slate-500 mb-1 flex items-center gap-1.5"><BarChart2 size={14} /> Attendance</p>
                   <div className="flex items-center gap-3">
                     <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
-                      <div className="h-full bg-blue-500 rounded-full" style={{ width: `${team.attendance}%` }}></div>
+                      <div className="h-full bg-slate-1000 rounded-full" style={{ width: `${team.attendance}%` }}></div>
                     </div>
                     <span className="text-sm font-semibold text-slate-700">{team.attendance}%</span>
                   </div>
@@ -202,7 +202,7 @@ export function TeamsHR() {
                 <div>
                   <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold mb-0.5">Next Milestone</p>
                   <p className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
-                    <Target size={14} className="text-blue-500" />
+                    <Target size={14} className="text-slate-900" />
                     Q3 Product Launch
                   </p>
                 </div>
@@ -221,7 +221,7 @@ export function TeamsHR() {
             
             {/* Action Bar */}
             <div className="mt-auto bg-slate-50 p-4 border-t border-slate-100 flex justify-end">
-              <button onClick={() => setSelectedTeamId(team.id)} className="px-5 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition shadow-sm">
+              <button onClick={() => setSelectedTeamId(team.id)} className="px-5 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition shadow-sm">
                 View Details
               </button>
             </div>

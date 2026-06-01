@@ -8,7 +8,7 @@ const moods = [
   { emoji: "😕", label: "Not great",    value: 2, bg: "bg-orange-50",  border: "border-orange-200", ring: "ring-orange-300", text: "text-orange-500", activeBg: "bg-orange-100" },
   { emoji: "😐", label: "It's okay",    value: 3, bg: "bg-amber-50",   border: "border-amber-200",  ring: "ring-amber-300",  text: "text-amber-500",  activeBg: "bg-amber-100"  },
   { emoji: "🙂", label: "Pretty good",  value: 4, bg: "bg-emerald-50", border: "border-emerald-200", ring: "ring-emerald-300", text: "text-emerald-500", activeBg: "bg-emerald-100" },
-  { emoji: "😄", label: "Fantastic!",   value: 5, bg: "bg-blue-50",    border: "border-blue-200",   ring: "ring-blue-300",   text: "text-blue-500",   activeBg: "bg-blue-100"    },
+  { emoji: "😄", label: "Fantastic!",   value: 5, bg: "bg-slate-100",    border: "border-slate-200",   ring: "ring-blue-300",   text: "text-slate-900",   activeBg: "bg-slate-200"    },
 ];
 
 const workloadLabels: Record<number, { label: string; color: string }> = {
@@ -38,7 +38,7 @@ export function DailyPulse() {
   const [clockInTime, setClockInTime]   = useState<string | null>(null);
 
   const employeeId = localStorage.getItem("employee_id") || "";
-  const employeeName = localStorage.getItem("employee_name") || "Karyawan";
+  const employeeName = localStorage.getItem("employee_name") || "Employee";
 
   useEffect(() => {
     if (!employeeId) return;
@@ -126,7 +126,7 @@ export function DailyPulse() {
   if (attendanceState === "loading") {
     return (
       <div className="flex justify-center items-center py-20">
-        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+        <Loader2 className="w-8 h-8 text-slate-900 animate-spin" />
       </div>
     );
   }
@@ -138,8 +138,8 @@ export function DailyPulse() {
         <div className="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
           <span className="text-3xl">📋</span>
         </div>
-        <h2 className="text-gray-800 font-semibold text-lg mb-2">Sudah check-in hari ini</h2>
-        <p className="text-gray-400 text-sm">Kamu sudah mengisi Daily Pulse hari ini. Sampai jumpa besok!</p>
+        <h2 className="text-gray-800 font-semibold text-lg mb-2">Sudah check-ins today</h2>
+        <p className="text-gray-400 text-sm">You have submitted your Daily Pulse today. See you tomorrow!</p>
       </div>
     );
   }
@@ -153,7 +153,7 @@ export function DailyPulse() {
           <CheckCircle className="w-8 h-8 text-emerald-500" />
         </div>
         <h2 className="text-gray-800 font-semibold text-lg mb-2">Check-in tersimpan!</h2>
-        <p className="text-gray-400 text-sm mb-6">Terima kasih atas kerja kerasmu hari ini.</p>
+        <p className="text-gray-400 text-sm mb-6">Thank you for your hard work today.</p>
       </div>
     );
   }
@@ -163,7 +163,7 @@ export function DailyPulse() {
     return (
       <div className="max-w-lg mx-auto py-10 text-center">
         <p className="text-red-500 text-sm mb-4">Gagal menyimpan check-in. Coba lagi.</p>
-        <button onClick={handleReset} className="text-sm text-blue-600 font-medium">Coba lagi</button>
+        <button onClick={handleReset} className="text-sm text-slate-900 font-medium">Coba lagi</button>
       </div>
     );
   }
@@ -174,12 +174,12 @@ export function DailyPulse() {
       <div className="max-w-lg mx-auto py-16 text-center">
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm px-8 py-10">
           <h1 className="text-gray-900 text-2xl font-semibold mb-2">Absensi Kehadiran</h1>
-          <p className="text-gray-500 text-sm mb-8">Silakan Clock-In untuk memulai jam kerjamu hari ini.</p>
+          <p className="text-gray-500 text-sm mb-8">Please Clock-In to start your work day.</p>
           
           <button
             onClick={handleClockIn}
             disabled={status === "submitting"}
-            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-white font-bold text-lg bg-blue-600 hover:bg-blue-700 shadow-md transition-all active:scale-95"
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-white font-bold text-lg bg-slate-900 hover:bg-slate-800 shadow-md transition-all active:scale-95"
           >
             {status === "submitting" ? <Loader2 className="w-5 h-5 animate-spin" /> : "🕒 Clock In Sekarang"}
           </button>
@@ -205,13 +205,13 @@ export function DailyPulse() {
             </span>
           </div>
           <p className="text-gray-400 text-sm mt-2">
-            Sebelum mengakhiri pekerjaan hari ini, beri tahu kami bagaimana harimu.
+            Before ending work today, tell us how your day went.
           </p>
         </div>
 
         {/* Mood grid */}
         <section className="mb-8">
-          <p className="text-sm text-gray-700 font-medium mb-3">Pilih mood kamu</p>
+          <p className="text-sm text-gray-700 font-medium mb-3">Choose your mood</p>
           <div className="grid grid-cols-5 gap-2">
             {moods.map((mood) => {
               const isSelected = selectedMood === mood.value;
@@ -255,7 +255,7 @@ export function DailyPulse() {
           />
           <div className="flex justify-between mt-2.5 px-0.5">
             {[1, 2, 3, 4, 5].map((v) => (
-              <span key={v} className={`text-xs transition-colors ${v === workload ? "text-blue-600 font-semibold" : "text-gray-300"}`}>
+              <span key={v} className={`text-xs transition-colors ${v === workload ? "text-slate-900 font-semibold" : "text-gray-300"}`}>
                 {v}
               </span>
             ))}
@@ -273,10 +273,10 @@ export function DailyPulse() {
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Ceritakan sesuatu, keluhan, atau highlight hari ini…"
+            placeholder="Share something, a complaint, or a highlight of your day..."
             rows={3}
             maxLength={300}
-            className="w-full text-sm text-gray-700 placeholder-gray-300 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition leading-relaxed"
+            className="w-full text-sm text-gray-700 placeholder-gray-300 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-blue-400 transition leading-relaxed"
           />
           <p className="text-right text-xs text-gray-300 mt-1">{note.length}/300</p>
         </section>
@@ -288,20 +288,20 @@ export function DailyPulse() {
           className={`
             w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-200
             ${selectedMood !== null
-              ? "bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md active:scale-[0.98]"
+              ? "bg-slate-900 hover:bg-slate-800 text-white shadow-sm hover:shadow-md active:scale-[0.98]"
               : "bg-gray-100 text-gray-300 cursor-not-allowed"
             }
           `}
         >
           {status === "submitting" ? (
-            <><Loader2 className="w-4 h-4 animate-spin" /> Menyimpan…</>
+            <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
           ) : (
             <>Submit & Clock Out</>
           )}
         </button>
 
         {selectedMood === null && (
-          <p className="text-center text-xs text-gray-400 mt-3">Pilih mood terlebih dahulu</p>
+          <p className="text-center text-xs text-gray-400 mt-3">Please choose a mood first</p>
         )}
       </div>
 

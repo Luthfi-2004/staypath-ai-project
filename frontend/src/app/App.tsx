@@ -5,13 +5,11 @@ import { DashboardPage } from "./components/DashboardPage";
 import { EmployeesPage } from "./components/EmployeesPage";
 import { Predictions } from "./components/Predictions";
 import { SettingsPage } from "./components/SettingsPage";
-import { DailyPulse } from "./components/DailyPulse";
-import { DashboardKaryawan } from "./components/DashboardKaryawan";
+import { DashboardEmployee } from "./components/DashboardKaryawan";
 import { ClockInOut } from "./components/ClockInOut";
 import { MyAttendances } from "./components/MyAttendances";
 import { MyTeam } from "./components/MyTeam";
 import { Projects } from "./components/Projects";
-import { LeaveRequestKaryawan } from "./components/LeaveRequestKaryawan";
 import { TeamsHR } from "./components/TeamsHR";
 import { AttendanceHR } from "./components/AttendanceHR";
 import {
@@ -22,7 +20,7 @@ import {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type PageId = "dashboard" | "ourteams" | "employees" | "attendance" | "predictions" | "dailypulse" | "leaverequests" | "settings" | "clockinout" | "myattendances" | "myteam" | "projects" | "payroll" | "reports";
-type Role = "hrd" | "karyawan" | null;
+type Role = "hrd" | "employee" | null;
 
 interface PageMeta {
   title: string;
@@ -37,14 +35,14 @@ const PAGE_META: Record<PageId, PageMeta> = {
   attendance: { title: "Attendance", subtitle: "Review clock records", icon: Calendar },
   predictions: { title: "Predictions", subtitle: "AI-based attrition forecasting", icon: TrendingUp },
   dailypulse: { title: "Absensi", subtitle: "Clock-in dan Pulse harian", icon: HeartPulse },
-  leaverequests: { title: "Pengajuan Cuti", subtitle: "Ajukan izin atau cuti", icon: Settings },
+  leaverequests: { title: "Leave Request", subtitle: "Ajukan izin atau cuti", icon: Settings },
   clockinout: { title: "Clock In/Out", subtitle: "Record working time", icon: Clock },
   myattendances: { title: "My Attendances", subtitle: "Attendance history", icon: FileText },
   myteam: { title: "My Team", subtitle: "Colleagues in department", icon: Users },
   projects: { title: "Projects", subtitle: "Coming Soon", icon: Folder },
   payroll: { title: "Payroll", subtitle: "Coming Soon", icon: FileText },
   reports: { title: "Reports", subtitle: "Coming Soon", icon: FileText },
-  settings: { title: "Pengaturan Profil", subtitle: "Akun & preferensi", icon: Settings },
+  settings: { title: "Settings Profil", subtitle: "Akun & preferensi", icon: Settings },
 };
 
 const HRD_ONLY: PageId[] = ["ourteams", "employees", "attendance", "predictions", "payroll", "reports"];
@@ -105,14 +103,14 @@ function UserDropdown({ name, role, onLogout, onNavigate }: {
         className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-100 transition-colors"
       >
         {/* Avatar */}
-        <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+        <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
           <span className="text-blue-700 text-[11px] font-bold">{initials}</span>
         </div>
         {/* Name + role — hidden on small screens */}
         <div className="hidden md:block text-left">
           <p className="text-xs font-semibold text-gray-800 leading-tight">{name}</p>
           <p className="text-[10px] text-gray-400 leading-tight">
-            {role === "hrd" ? "HRD" : "Karyawan"}
+            {role === "hrd" ? "HRD" : "Employee"}
           </p>
         </div>
         <ChevronDown size={13} className={`text-gray-400 transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
@@ -124,13 +122,13 @@ function UserDropdown({ name, role, onLogout, onNavigate }: {
           {/* User info */}
           <div className="px-4 py-3.5 border-b border-gray-100">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
                 <span className="text-blue-700 text-xs font-bold">{initials}</span>
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-gray-800 truncate">{name}</p>
                 <p className="text-xs text-gray-400 truncate">
-                  {role === "hrd" ? "HR Department" : "Karyawan"}
+                  {role === "hrd" ? "HR Department" : "Employee"}
                 </p>
               </div>
             </div>
@@ -143,14 +141,14 @@ function UserDropdown({ name, role, onLogout, onNavigate }: {
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors font-medium mb-1"
             >
               <Settings size={15} />
-              Pengaturan Profil
+              Settings Profil
             </button>
             <button
               onClick={() => { onLogout(); setOpen(false); }}
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 transition-colors font-medium"
             >
               <LogOut size={15} />
-              Keluar
+              Logout
             </button>
           </div>
         </div>
@@ -165,7 +163,11 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [role, setRole] = useState<Role>(localStorage.getItem("role") as Role);
+  const [role, setRole] = useState<Role>(() => {
+    const r = localStorage.getItem("role");
+    if (r === "karyawan") return "employee";
+    return r as Role;
+  });
   const [employeeName, setEmpName] = useState(localStorage.getItem("employee_name") || "User");
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -194,7 +196,7 @@ export default function App() {
   const activePage = getPageFromPath();
 
   const handleNavigate = (page: string) => {
-    if (role === "karyawan" && HRD_ONLY.includes(page as PageId)) return;
+    if (role === "employee" && HRD_ONLY.includes(page as PageId)) return;
     navigate(page === "dashboard" ? "/dashboard" : `/dashboard/${page}`);
     setMobileOpen(false);
   };
@@ -214,7 +216,7 @@ export default function App() {
   const meta = PAGE_META[activePage];
   const Icon = meta.icon;
 
-  if (role === "karyawan" && HRD_ONLY.includes(activePage)) {
+  if (role === "employee" && HRD_ONLY.includes(activePage)) {
     navigate("/dashboard");
     return null;
   }
@@ -228,8 +230,6 @@ export default function App() {
           activePage={activePage}
           onNavigate={handleNavigate}
           role={role}
-          employeeName={employeeName}
-          onLogout={handleLogout}
         />
       </aside>
 
@@ -242,8 +242,6 @@ export default function App() {
               activePage={activePage}
               onNavigate={handleNavigate}
               role={role}
-              employeeName={employeeName}
-              onLogout={handleLogout}
               onClose={() => setMobileOpen(false)}
             />
           </aside>
@@ -266,11 +264,11 @@ export default function App() {
 
           {/* Page title */}
           <div className="flex items-center gap-2.5 flex-1 min-w-0">
-            <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-              <Icon size={14} className="text-blue-600" />
+            <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+              <Icon size={14} className="text-slate-900" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-gray-900 text-sm font-semibold leading-tight truncate">{meta.title}</h1>
+              <h1 className="text-gray-900 text-sm font-semibold leading-tight truncate font-heading">{meta.title}</h1>
               <p className="text-gray-400 text-[11px] leading-tight hidden sm:block">{meta.subtitle}</p>
             </div>
           </div>
@@ -285,9 +283,9 @@ export default function App() {
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-            {role === "karyawan" ? (
+            {role === "employee" ? (
               <>
-                {activePage === "dashboard" && <DashboardKaryawan />}
+                {activePage === "dashboard" && <DashboardEmployee onNavigate={handleNavigate} />}
                 {activePage === "clockinout" && <ClockInOut />}
                 {activePage === "myattendances" && <MyAttendances />}
                 {activePage === "myteam" && <MyTeam />}

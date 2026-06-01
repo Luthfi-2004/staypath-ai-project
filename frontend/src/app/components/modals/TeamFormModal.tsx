@@ -12,7 +12,7 @@ export function TeamFormModal({ onClose, onSuccess }: { onClose: () => void; onS
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return setError("Nama tim wajib diisi.");
+    if (!name.trim()) return setError("Team name is required.");
     setLoading(true);
     try {
       const res = await fetch(`${API_URL}/api/teams`, {
@@ -20,7 +20,7 @@ export function TeamFormModal({ onClose, onSuccess }: { onClose: () => void; onS
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, department, expected_size: expectedSize }),
       });
-      if (!res.ok) throw new Error("Gagal membuat tim");
+      if (!res.ok) throw new Error("Failed to create team");
       onSuccess();
     } catch (err: any) {
       setError(err.message);
@@ -40,25 +40,25 @@ export function TeamFormModal({ onClose, onSuccess }: { onClose: () => void; onS
           {error && <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle size={11} /> {error}</p>}
           
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1.5">Nama Tim</label>
-            <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400" placeholder="Misal: Frontend Squad" />
+            <label className="block text-xs font-medium text-gray-600 mb-1.5">Team Name</label>
+            <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-blue-400" placeholder="Misal: Frontend Squad" />
           </div>
           
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1.5">Departemen</label>
-            <select value={department} onChange={e => setDepartment(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400">
+            <select value={department} onChange={e => setDepartment(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-blue-400">
               {["Engineering", "Product", "Design", "Marketing", "Sales", "Human Resources"].map(d => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1.5">Target Kapasitas (Member)</label>
-            <input type="number" min="1" value={expectedSize} onChange={e => setExpectedSize(Number(e.target.value))} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400" />
+            <input type="number" min="1" value={expectedSize} onChange={e => setExpectedSize(Number(e.target.value))} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-blue-400" />
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:bg-gray-100 rounded-lg font-medium transition">Batal</button>
-            <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium transition flex items-center gap-2">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:bg-gray-100 rounded-lg font-medium transition">Cancel</button>
+            <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-slate-900 text-white hover:bg-slate-800 rounded-lg font-medium transition flex items-center gap-2">
               {loading ? "Menyimpan..." : "Create Team"}
             </button>
           </div>

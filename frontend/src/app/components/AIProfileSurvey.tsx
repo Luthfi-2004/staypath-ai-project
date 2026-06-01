@@ -95,62 +95,81 @@ export function AIProfileSurvey() {
     );
   }
 
-  const inputCls = "w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition bg-white";
+  const inputCls = "w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-blue-400 transition bg-white";
   const labelCls = "block text-xs font-medium text-gray-600 mb-1.5";
 
   return (
     <div>
       <div className="space-y-6">
         {/* Section 1: Tools & Adoption */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-50">
-          <div>
-            <label className={labelCls}>Tool AI Utama yang sering dipakai</label>
-            <select value={form.primary_ai_tool} onChange={(e) => set("primary_ai_tool", e.target.value)} className={inputCls}>
-              {AI_TOOLS.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 bg-gray-50/50 p-5 rounded-2xl border border-gray-100">
+          <div className="flex flex-col">
+            <label className={labelCls}>Primary AI Tool Used</label>
+            <div className="mt-auto">
+              <select value={form.primary_ai_tool} onChange={(e) => set("primary_ai_tool", e.target.value)} className={inputCls}>
+                {AI_TOOLS.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
           </div>
-          <div>
-            <label className={labelCls}>Tingkat Penguasaan/Adopsi AI</label>
-            <select value={form.ai_adoption_stage} onChange={(e) => set("ai_adoption_stage", e.target.value)} className={inputCls}>
-              {ADOPTION_STAGES.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
+          <div className="flex flex-col">
+            <label className={labelCls}>AI Adoption Stage</label>
+            <div className="mt-auto">
+              <select value={form.ai_adoption_stage} onChange={(e) => set("ai_adoption_stage", e.target.value)} className={inputCls}>
+                {ADOPTION_STAGES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
           </div>
         </div>
 
         {/* Section 2: Habit Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className={labelCls}>Jumlah Tools AI yang dipakai per hari</label>
-            <input type="number" min="0" step="1" value={form.ai_tools_used_per_day} onChange={(e) => set("ai_tools_used_per_day", Number(e.target.value))} className={inputCls} />
-            <p className="text-[10px] text-gray-400 mt-1">Berapa macam AI yang Anda buka hari ini?</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="flex flex-col bg-gray-50/30 p-4 rounded-xl border border-gray-100">
+            <label className={labelCls}>AI Tools Used Per Day</label>
+            <div className="mt-auto pt-2">
+              <input type="number" min="0" step="1" value={form.ai_tools_used_per_day} onChange={(e) => set("ai_tools_used_per_day", Number(e.target.value))} className={inputCls} />
+              <p className="text-[10px] text-slate-500 mt-1.5 h-3">How many AI tools did you use today?</p>
+            </div>
           </div>
-          <div>
-            <label className={labelCls}>Jam kerja dengan bantuan AI (Jam/Hari)</label>
-            <input type="number" min="0" step="0.5" value={form.hours_with_ai_assistance_daily} onChange={(e) => set("hours_with_ai_assistance_daily", Number(e.target.value))} className={inputCls} />
+          <div className="flex flex-col bg-gray-50/30 p-4 rounded-xl border border-gray-100">
+            <label className={labelCls}>Daily Hours with AI Assistance (Hrs/Day)</label>
+            <div className="mt-auto pt-2">
+              <input type="number" min="0" step="0.5" value={form.hours_with_ai_assistance_daily} onChange={(e) => set("hours_with_ai_assistance_daily", Number(e.target.value))} className={inputCls} />
+              <p className="text-[10px] text-slate-500 mt-1.5 h-3">Average daily time using AI.</p>
+            </div>
           </div>
-          <div>
-            <label className={labelCls}>Persentase tugas yang digantikan AI (%)</label>
-            <input type="number" min="0" max="100" step="1" value={form.ai_replaces_my_tasks_pct} onChange={(e) => set("ai_replaces_my_tasks_pct", Number(e.target.value))} className={inputCls} />
-            <p className="text-[10px] text-gray-400 mt-1">Misal: 20 berarti 20% tugas harian beres pakai AI.</p>
+          <div className="flex flex-col bg-gray-50/30 p-4 rounded-xl border border-gray-100">
+            <label className={labelCls}>Percentage of Tasks Replaced by AI (%)</label>
+            <div className="mt-auto pt-2">
+              <input type="number" min="0" max="100" step="1" value={form.ai_replaces_my_tasks_pct} onChange={(e) => set("ai_replaces_my_tasks_pct", Number(e.target.value))} className={inputCls} />
+              <p className="text-[10px] text-slate-500 mt-1.5 h-3">Example: 20 means 20% of daily tasks are done using AI.</p>
+            </div>
           </div>
-          <div>
-            <label className={labelCls}>Jam belajar/eksplorasi AI (Jam/Minggu)</label>
-            <input type="number" min="0" step="0.5" value={form.weekly_ai_upskilling_hrs} onChange={(e) => set("weekly_ai_upskilling_hrs", Number(e.target.value))} className={inputCls} />
+          <div className="flex flex-col bg-gray-50/30 p-4 rounded-xl border border-gray-100">
+            <label className={labelCls}>AI Upskilling Time (Hrs/Week)</label>
+            <div className="mt-auto pt-2">
+              <input type="number" min="0" step="0.5" value={form.weekly_ai_upskilling_hrs} onChange={(e) => set("weekly_ai_upskilling_hrs", Number(e.target.value))} className={inputCls} />
+              <p className="text-[10px] text-slate-500 mt-1.5 h-3">Dedicated time for exploring new AI tools.</p>
+            </div>
           </div>
         </div>
 
         {/* Section 3: Sentiment & Perception */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-50 mt-4">
-          <div>
-            <label className={labelCls}>Skor Produktivitas Saat Ini (0 - 100)</label>
-            <input type="number" min="0" max="100" step="1" value={form.productivity_score} onChange={(e) => set("productivity_score", Number(e.target.value))} className={inputCls} />
-            <p className="text-[10px] text-gray-400 mt-1">100 = Sangat Produktif</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 bg-gray-50/50 p-5 rounded-2xl border border-gray-100 mt-2">
+          <div className="flex flex-col">
+            <label className={labelCls}>Current Productivity Score (0 - 100)</label>
+            <div className="mt-auto pt-2">
+              <input type="number" min="0" max="100" step="1" value={form.productivity_score} onChange={(e) => set("productivity_score", Number(e.target.value))} className={inputCls} />
+              <p className="text-[10px] text-slate-500 mt-1.5 h-3">100 = Highly Productive</p>
+            </div>
           </div>
-          <div>
-            <label className={labelCls}>Kekhawatiran pekerjaan digantikan AI</label>
-            <select value={form.fear_of_ai_replacement} onChange={(e) => set("fear_of_ai_replacement", e.target.value)} className={inputCls}>
-              {FEAR_LEVELS.map((t) => <option key={t} value={t}>{t === "Low" ? "Low (Tidak Takut)" : t === "High" ? "High (Sangat Takut)" : "Medium (Biasa Saja)"}</option>)}
-            </select>
+          <div className="flex flex-col">
+            <label className={labelCls}>Fear of AI Replacement</label>
+            <div className="mt-auto pt-2">
+              <select value={form.fear_of_ai_replacement} onChange={(e) => set("fear_of_ai_replacement", e.target.value)} className={inputCls}>
+                {FEAR_LEVELS.map((t) => <option key={t} value={t}>{t === "Low" ? "Low (Not Worried)" : t === "High" ? "High (Highly Worried)" : "Medium (Neutral)"}</option>)}
+              </select>
+              <p className="text-[10px] text-slate-500 mt-1.5 h-3">How concerned are you about AI?</p>
+            </div>
           </div>
         </div>
       </div>
@@ -167,10 +186,10 @@ export function AIProfileSurvey() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-medium rounded-xl transition-all shadow-sm"
+          className="flex items-center gap-2 px-6 py-2.5 bg-slate-900 hover:bg-slate-800 active:bg-blue-800 text-white text-sm font-medium rounded-xl transition-all shadow-sm"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          Simpan Profil
+          Save Profile
         </button>
       </div>
 

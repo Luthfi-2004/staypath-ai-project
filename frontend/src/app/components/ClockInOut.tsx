@@ -99,7 +99,7 @@ export function ClockInOut() {
   };
 
   if (attendanceState === "loading") {
-    return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-blue-600 animate-spin" /></div>;
+    return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-slate-900 animate-spin" /></div>;
   }
 
   return (
@@ -114,14 +114,14 @@ export function ClockInOut() {
         {/* Left Col: Clock */}
         <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm text-center flex flex-col items-center">
           <div className="flex items-center gap-2 mb-6">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Clock size={20} /></div>
+            <div className="p-2 bg-slate-100 text-slate-900 rounded-lg"><Clock size={20} /></div>
             <div className="text-left">
               <p className="font-bold text-slate-800 leading-tight">Current Time</p>
               <p className="text-xs text-slate-500">Jakarta, Indonesia</p>
             </div>
           </div>
           
-          <div className="bg-blue-600 w-full rounded-3xl py-12 px-6 text-white shadow-md relative overflow-hidden mb-6">
+          <div className="bg-slate-900 w-full rounded-3xl py-12 px-6 text-white shadow-md relative overflow-hidden mb-6">
             <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
             <div className="absolute bottom-0 left-0 -ml-8 -mb-8 w-32 h-32 bg-black/10 rounded-full blur-2xl"></div>
             
@@ -153,7 +153,7 @@ export function ClockInOut() {
               <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
                 <span className="text-slate-600 font-medium">Status</span>
                 {attendanceState === "needs_clock_in" && <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold">Not Clocked In</span>}
-                {attendanceState === "needs_clock_out" && <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">Clocked In</span>}
+                {attendanceState === "needs_clock_out" && <span className="bg-slate-200 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">Clocked In</span>}
                 {attendanceState === "done" && <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">Completed</span>}
               </div>
               <div className="flex justify-between items-center p-3 bg-white rounded-xl border border-slate-200">
@@ -165,7 +165,7 @@ export function ClockInOut() {
                 <span className="text-slate-800 font-bold">{clockOutTime || "--:--"}</span>
               </div>
               {clockInTime && clockOutTime && (
-                <div className="flex justify-between items-center p-3 bg-blue-50/50 rounded-xl border border-blue-100">
+                <div className="flex justify-between items-center p-3 bg-slate-100/50 rounded-xl border border-slate-200">
                   <span className="text-blue-700 font-medium">Working Hours</span>
                   <span className="text-blue-800 font-bold">
                     {(() => {
@@ -195,10 +195,10 @@ export function ClockInOut() {
             <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm text-center">
               {attendanceState === "needs_clock_in" && (
                 <>
-                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4"><Clock size={24} /></div>
+                  <div className="w-12 h-12 bg-slate-100 text-slate-900 rounded-full flex items-center justify-center mx-auto mb-4"><Clock size={24} /></div>
                   <h3 className="font-bold text-slate-800 text-lg mb-1">Ready to Clock In?</h3>
                   <p className="text-slate-500 text-sm mb-6">Mark your attendance to start your day.</p>
-                  <button onClick={handleClockIn} disabled={submitting} className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                  <button onClick={handleClockIn} disabled={submitting} className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2">
                     {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Clock In"}
                   </button>
                 </>
@@ -234,7 +234,7 @@ export function ClockInOut() {
                   <button 
                     key={m.val} 
                     onClick={() => setSelectedMood(m.val)}
-                    className={`flex-1 py-3 text-2xl rounded-xl border-2 transition ${selectedMood === m.val ? 'border-blue-500 bg-blue-50 scale-105' : 'border-slate-100 bg-slate-50 hover:bg-slate-100'}`}
+                    className={`flex-1 py-3 text-2xl rounded-xl border-2 transition ${selectedMood === m.val ? 'border-blue-500 bg-slate-100 scale-105' : 'border-slate-100 bg-slate-50 hover:bg-slate-100'}`}
                   >
                     {m.emoji}
                   </button>
@@ -248,7 +248,7 @@ export function ClockInOut() {
               ></textarea>
               <div className="flex gap-2">
                 <button onClick={() => setShowPulseForm(false)} className="flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200">Cancel</button>
-                <button onClick={handleClockOutSubmit} disabled={!selectedMood || submitting} className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50">
+                <button onClick={handleClockOutSubmit} disabled={!selectedMood || submitting} className="flex-1 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 disabled:opacity-50">
                   {submitting ? '...' : 'Submit & Clock Out'}
                 </button>
               </div>

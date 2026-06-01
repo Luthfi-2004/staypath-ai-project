@@ -25,14 +25,14 @@ export function TeamDetailsHR({ teamId, onBack }: { teamId: string, onBack: () =
   }, [teamId]);
 
   if (loading) {
-    return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-blue-600 animate-spin" /></div>;
+    return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-slate-900 animate-spin" /></div>;
   }
 
   if (!team) {
     return (
       <div className="py-20 text-center text-slate-500">
         <p>Team not found.</p>
-        <button onClick={onBack} className="mt-4 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg">Go Back</button>
+        <button onClick={onBack} className="mt-4 px-4 py-2 bg-slate-100 text-slate-900 rounded-lg">Go Back</button>
       </div>
     );
   }
@@ -61,7 +61,7 @@ export function TeamDetailsHR({ teamId, onBack }: { teamId: string, onBack: () =
           <button className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50 transition shadow-sm">
             Edit Team
           </button>
-          <button onClick={() => setShowAddMember(true)} className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
+          <button onClick={() => setShowAddMember(true)} className="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition shadow-sm">
             Add Member
           </button>
         </div>
@@ -70,7 +70,7 @@ export function TeamDetailsHR({ teamId, onBack }: { teamId: string, onBack: () =
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Total Members", value: membersCount, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "Total Members", value: membersCount, icon: Users, color: "text-slate-900", bg: "bg-slate-100" },
           { label: "Expected Size", value: team.expected_size, icon: Target, color: "text-indigo-600", bg: "bg-indigo-50" },
           { label: "Open Roles", value: openRoles, icon: Briefcase, color: "text-amber-600", bg: "bg-amber-50" },
           { label: "Performance", value: "92%", icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
@@ -100,13 +100,13 @@ export function TeamDetailsHR({ teamId, onBack }: { teamId: string, onBack: () =
             
             <div className="space-y-3">
               {team.members?.map((emp: any) => (
-                <div key={emp.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl hover:border-blue-100 transition">
+                <div key={emp.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl hover:border-slate-200 transition">
                   <div className="flex items-center gap-4">
                     <div className="relative">
-                      <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-lg">
+                      <div className="w-12 h-12 rounded-xl bg-slate-200 text-blue-700 font-bold flex items-center justify-center text-lg">
                         {(emp.name || "UN").substring(0, 2).toUpperCase()}
                       </div>
-                      {emp.status === 'Aktif' && <div className="absolute -bottom-1 -right-1 w-4 h-4 border-2 border-white bg-emerald-500 rounded-full"></div>}
+                      {emp.status === 'Active' && <div className="absolute -bottom-1 -right-1 w-4 h-4 border-2 border-white bg-emerald-500 rounded-full"></div>}
                     </div>
                     <div>
                       <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
@@ -117,7 +117,7 @@ export function TeamDetailsHR({ teamId, onBack }: { teamId: string, onBack: () =
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 transition shadow-sm">
+                    <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-900 hover:border-slate-200 transition shadow-sm">
                       <Mail size={16} />
                     </button>
                     <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-sm">
@@ -141,13 +141,13 @@ export function TeamDetailsHR({ teamId, onBack }: { teamId: string, onBack: () =
           <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
             <h3 className="font-bold text-slate-800 text-lg mb-4">Active Projects</h3>
             <div className="space-y-4">
-              <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl">
+              <div className="p-4 bg-slate-100 border border-slate-200 rounded-2xl">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-semibold text-blue-900 text-sm">Q3 Product Launch</h4>
-                  <span className="text-xs font-bold text-blue-600">In Progress</span>
+                  <span className="text-xs font-bold text-slate-900">In Progress</span>
                 </div>
                 <div className="w-full bg-blue-200/50 h-2 rounded-full overflow-hidden mt-3">
-                  <div className="bg-blue-600 h-full w-[65%] rounded-full"></div>
+                  <div className="bg-slate-900 h-full w-[65%] rounded-full"></div>
                 </div>
               </div>
               <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl">
@@ -160,7 +160,7 @@ export function TeamDetailsHR({ teamId, onBack }: { teamId: string, onBack: () =
                 </div>
               </div>
             </div>
-            <button className="w-full mt-4 py-2.5 text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition">
+            <button className="w-full mt-4 py-2.5 text-sm font-semibold text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
               View All Projects
             </button>
           </div>

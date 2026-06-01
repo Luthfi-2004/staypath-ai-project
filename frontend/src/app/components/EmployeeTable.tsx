@@ -52,7 +52,7 @@ export function EmployeeTable() {
 
         const formatted: Employee[] = data
           .filter((emp: any) => {
-            if (emp.status === 'Dijadwalkan') intervenedIds.add(emp.id);
+            if (emp.status === 'Scheduled') intervenedIds.add(emp.id);
             if (emp.attrition_risk === 'High' || emp.attrition_risk === 'Medium') return true;
             if (!emp.attrition_risk && emp.burnout_score >= 6) return true;
             return false;
@@ -93,7 +93,7 @@ export function EmployeeTable() {
       const res = await fetch(`${API_URL}/api/employees/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "Dijadwalkan" }),
+        body: JSON.stringify({ status: "Scheduled" }),
       });
 
       if (!res.ok) throw new Error("Database menolak update");
@@ -113,14 +113,14 @@ export function EmployeeTable() {
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between">
         <div>
-          <h2 className="text-gray-900 font-semibold">Karyawan Berisiko Tinggi</h2>
+          <h2 className="text-gray-900 font-semibold">Employee Berisiko Tinggi</h2>
           <p className="text-gray-400 text-sm mt-0.5">
-            {isLoading ? "Memuat data…" : "Karyawan yang membutuhkan perhatian segera"}
+            {isLoading ? "Memuat data…" : "Employee yang membutuhkan perhatian segera"}
           </p>
         </div>
         {!isLoading && (
-          <span className="text-xs text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full font-medium border border-blue-100">
-            {employees.length} karyawan
+          <span className="text-xs text-slate-900 bg-slate-100 px-2.5 py-1 rounded-full font-medium border border-slate-200">
+            {employees.length} employee
           </span>
         )}
       </div>
@@ -129,7 +129,7 @@ export function EmployeeTable() {
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-50">
-              <th className="text-left px-6 py-3.5 text-xs text-gray-400 uppercase tracking-wider font-medium">Karyawan</th>
+              <th className="text-left px-6 py-3.5 text-xs text-gray-400 uppercase tracking-wider font-medium">Employee</th>
               <th className="text-left px-6 py-3.5 text-xs text-gray-400 uppercase tracking-wider font-medium">Role</th>
               <th className="text-left px-6 py-3.5 text-xs text-gray-400 uppercase tracking-wider font-medium">Kepuasan Kerja</th>
               <th className="text-left px-6 py-3.5 text-xs text-gray-400 uppercase tracking-wider font-medium">Risk Level</th>
@@ -147,7 +147,7 @@ export function EmployeeTable() {
             ) : employees.length === 0 ? (
               <tr>
                 <td colSpan={5} className="text-center py-12 text-gray-400 text-sm">
-                  Tidak ada karyawan berisiko tinggi saat ini.
+                  Tidak ada employee berisiko tinggi saat ini.
                 </td>
               </tr>
             ) : (
@@ -158,7 +158,7 @@ export function EmployeeTable() {
                   <tr key={employee.id} className="hover:bg-gray-50/60 transition-colors duration-100">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
                           <span className="text-blue-700 text-xs font-semibold">{employee.avatar}</span>
                         </div>
                         <div>
@@ -181,12 +181,12 @@ export function EmployeeTable() {
                       {done ? (
                         <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg font-medium border border-emerald-100">
                           <CheckCircle size={12} />
-                          Dijadwalkan
+                          Scheduled
                         </span>
                       ) : (
                         <button
                           onClick={() => handleIntervene(employee.id)}
-                          className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors duration-150"
+                          className="inline-flex items-center gap-1.5 text-sm text-slate-900 hover:text-blue-700 font-medium hover:bg-slate-100 px-3 py-1.5 rounded-lg transition-colors duration-150"
                         >
                           Intervene
                           <ChevronRight size={14} />

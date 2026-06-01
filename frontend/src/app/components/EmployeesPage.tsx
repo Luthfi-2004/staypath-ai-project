@@ -20,8 +20,8 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Status = "Aktif" | "Cuti" | "Nonaktif" | "Dijadwalkan" | string;
-type AuthRole = "karyawan" | "hrd";
+type Status = "Active" | "Leave" | "Inactive" | "Scheduled" | string;
+type AuthRole = "employee" | "hrd";
 
 interface EmployeeRecord {
   id: number;
@@ -62,8 +62,8 @@ export const DEPARTMENTS = [
   "Analytics", "Finance", "Human Resources", "Operations",
 ];
 
-const STATUSES: Status[] = ["Aktif", "Cuti", "Nonaktif", "Dijadwalkan"];
-const AUTH_ROLES: AuthRole[] = ["karyawan", "hrd"];
+const STATUSES: Status[] = ["Active", "Leave", "Inactive", "Scheduled"];
+const AUTH_ROLES: AuthRole[] = ["employee", "hrd"];
 
 // Pilihan untuk Dropdown Form AI
 const EDUCATION_LEVELS = ["Bachelor", "Master", "PhD", "Bootcamp", "Self-taught"];
@@ -91,21 +91,21 @@ function resolveJoinDate(emp: any): string {
 // ─── Status badge ─────────────────────────────────────────────────────────────
 
 const statusStyle: Record<string, string> = {
-  Aktif: "bg-emerald-50 text-emerald-600 border border-emerald-100",
-  Cuti: "bg-amber-50 text-amber-600 border border-amber-100",
-  Nonaktif: "bg-gray-100 text-gray-400 border border-gray-200",
-  Dijadwalkan: "bg-blue-50 text-blue-600 border border-blue-100",
+  Active: "bg-emerald-50 text-emerald-600 border border-emerald-100",
+  Leave: "bg-amber-50 text-amber-600 border border-amber-100",
+  Inactive: "bg-gray-100 text-gray-400 border border-gray-200",
+  Scheduled: "bg-slate-100 text-slate-900 border border-slate-200",
 };
 const statusDot: Record<string, string> = {
-  Aktif: "bg-emerald-500",
-  Cuti: "bg-amber-400",
-  Nonaktif: "bg-gray-400",
-  Dijadwalkan: "bg-blue-500",
+  Active: "bg-emerald-500",
+  Leave: "bg-amber-400",
+  Inactive: "bg-gray-400",
+  Scheduled: "bg-slate-1000",
 };
 
 function StatusBadge({ status }: { status: Status }) {
-  const style = statusStyle[status] ?? statusStyle["Nonaktif"];
-  const dot = statusDot[status] ?? statusDot["Nonaktif"];
+  const style = statusStyle[status] ?? statusStyle["Inactive"];
+  const dot = statusDot[status] ?? statusDot["Inactive"];
   return (
     <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium ${style}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
@@ -122,7 +122,7 @@ function AuthRoleBadge({ role }: { role: AuthRole }) {
       ? "bg-violet-50 text-violet-600 border border-violet-100"
       : "bg-gray-50 text-gray-500 border border-gray-100"
       }`}>
-      {role === "hrd" ? "HRD" : "Karyawan"}
+      {role === "hrd" ? "HRD" : "Employee"}
     </span>
   );
 }
@@ -130,7 +130,7 @@ function AuthRoleBadge({ role }: { role: AuthRole }) {
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
 const avatarColors = [
-  "bg-blue-100 text-blue-700", "bg-violet-100 text-violet-700",
+  "bg-slate-200 text-blue-700", "bg-violet-100 text-violet-700",
   "bg-rose-100 text-rose-600", "bg-emerald-100 text-emerald-700",
   "bg-amber-100 text-amber-700", "bg-cyan-100 text-cyan-700",
 ];
@@ -151,9 +151,9 @@ export const emptyForm = {
   department: DEPARTMENTS[0],
   role: "",
   email: "",
-  status: "Aktif" as Status,
+  status: "Active" as Status,
   joinDate: new Date().toISOString().split("T")[0],
-  authRole: "karyawan" as AuthRole,
+  authRole: "employee" as AuthRole,
   password: "",
 
   // Step 2
@@ -197,7 +197,7 @@ function validate(
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) {
       errors.email = "Format email tidak valid.";
     }
-    if (!f.joinDate) errors.joinDate = "Tanggal bergabung wajib diisi.";
+    if (!f.joinDate) errors.joinDate = "Join date is required.";
     if (mode === "add" && !f.password.trim())
       errors.password = "Password awal wajib diisi.";
   }
@@ -238,7 +238,7 @@ function Field({
 
 const inputCls = (err?: string) =>
   `w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 transition text-gray-700 bg-white ${err ? "border-red-300 focus:ring-red-100 focus:border-red-400"
-    : "border-gray-200 focus:ring-blue-100 focus:border-blue-400"
+    : "border-gray-200 focus:ring-slate-200 focus:border-blue-400"
   }`;
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
@@ -323,14 +323,14 @@ export function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
             >
               <div
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${step >= num
-                  ? "bg-blue-600 text-white"
+                  ? "bg-slate-900 text-white"
                   : "bg-gray-100 text-gray-400"
                   }`}
               >
                 {num}
               </div>
               <span
-                className={`text-[10px] uppercase tracking-wider font-semibold ${step >= num ? "text-blue-600" : "text-gray-400"}`}
+                className={`text-[10px] uppercase tracking-wider font-semibold ${step >= num ? "text-slate-900" : "text-gray-400"}`}
               >
                 {num === 1 ? "Info" : "Profil"}
               </span>
@@ -375,7 +375,7 @@ export function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
                   className={inputCls(errors.email)}
                 />
               </Field>
-              <Field label="Tanggal Bergabung" required error={errors.joinDate}>
+              <Field label="Join Date" required error={errors.joinDate}>
                 <input
                   type="date"
                   value={form.joinDate}
@@ -432,7 +432,7 @@ export function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
                 >
                   {AUTH_ROLES.map((r) => (
                     <option key={r} value={r}>
-                      {r === "hrd" ? "HRD" : "Karyawan"}
+                      {r === "hrd" ? "HRD" : "Employee"}
                     </option>
                   ))}
                 </select>
@@ -534,13 +534,16 @@ export function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Gaji Tahunan (USD k)">
+              <Field label="Monthly Salary (Rp)">
                 <input
                   type="number"
                   min="0"
-                  step="1"
-                  value={form.salary_usd_k}
-                  onChange={(e) => set("salary_usd_k", Number(e.target.value))}
+                  step="100000"
+                  value={form.salary_usd_k ? Math.round((form.salary_usd_k * 16000000) / 12) : ""}
+                  onChange={(e) => {
+                    const idr = Number(e.target.value);
+                    set("salary_usd_k", (idr * 12) / 16000000);
+                  }}
                   className={inputCls()}
                 />
               </Field>
@@ -566,7 +569,7 @@ export function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
               onClick={onClose}
               className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium"
             >
-              Batal
+              Cancel
             </button>
           )}
         </div>
@@ -584,9 +587,9 @@ export function EmployeeForm({ initial, employeeId, onSave, onClose, mode }: {
             <button
               type="button"
               onClick={handleSubmit}
-              className="px-6 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm"
+              className="px-6 py-2 text-sm bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-medium transition-colors shadow-sm"
             >
-              {mode === "add" ? "Simpan Data Karyawan" : "Simpan Perubahan"}
+              {mode === "add" ? "Save Data Employee" : "Save Perubahan"}
             </button>
           )}
         </div>
@@ -601,7 +604,7 @@ function DeleteDialog({ employee, onConfirm, onClose }: {
   employee: EmployeeRecord; onConfirm: () => void; onClose: () => void;
 }) {
   return (
-    <Modal title="Hapus Karyawan" onClose={onClose}>
+    <Modal title="Hapus Employee" onClose={onClose}>
       <div className="px-6 py-6 text-center">
         <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
           <Trash2 className="w-5 h-5 text-red-500" />
@@ -612,7 +615,7 @@ function DeleteDialog({ employee, onConfirm, onClose }: {
         </p>
       </div>
       <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2.5">
-        <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium">Batal</button>
+        <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium">Cancel</button>
         <button onClick={onConfirm} className="px-5 py-2 text-sm bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors shadow-sm">Ya, Hapus</button>
       </div>
     </Modal>
@@ -664,11 +667,11 @@ export function EmployeesPage() {
           name: emp.name,
           department: emp.department,
           role: emp.role,
-          status: emp.status ?? "Aktif",
+          status: emp.status ?? "Active",
           email:
             emp.email ?? `${emp.name.split(" ")[0].toLowerCase()}@company.com`,
           joinDate: resolveJoinDate(emp),
-          authRole: (emp.auth_role as AuthRole) ?? "karyawan",
+          authRole: (emp.auth_role as AuthRole) ?? "employee",
 
           // AI Fields
           education_level: emp.education_level,
@@ -693,8 +696,8 @@ export function EmployeesPage() {
 
         setRecords(mapped);
       } catch (err) {
-        console.error("Gagal fetch karyawan:", err);
-        showToast("Gagal mengambil data dari server.");
+        console.error("Gagal fetch employee:", err);
+        showToast("Gagal mengambil data of server.");
       } finally {
         setIsLoading(false);
       }
@@ -730,7 +733,7 @@ export function EmployeesPage() {
 
   const handleAdd = async (data: FormState) => {
     try {
-      // Hitung ukuran tim secara otomatis berdasarkan jumlah karyawan di departemen yang sama
+      // Hitung ukuran tim secara otomatis berdasarkan jumlah employee di departemen yang sama
       const countInDept = records.filter(r => r.department === data.department).length;
       const dynamicTeamSize = Math.max(countInDept + 1, 1);
 
@@ -747,17 +750,17 @@ export function EmployeesPage() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const newEmp = await res.json();
 
-      // Pisahkan password supaya tidak masuk ke state React UI (hindari TS Error)
+      // Pisahkan password supaya tidak masuk ke state React UI (hinof TS Error)
       const { password, ...restData } = data;
 
       const formatted: EmployeeRecord = {
         id: newEmp.id,
         employeeId: `${String(newEmp.id).padStart(3, "0")}`,
         ...restData,
-        status: newEmp.status ?? "Aktif",
+        status: newEmp.status ?? "Active",
         email: newEmp.email ?? data.email,
         joinDate: resolveJoinDate(newEmp),
-        authRole: (newEmp.auth_role as AuthRole) ?? "karyawan",
+        authRole: (newEmp.auth_role as AuthRole) ?? "employee",
       };
 
       setRecords((r) => [formatted, ...r]);
@@ -765,7 +768,7 @@ export function EmployeesPage() {
       showToast(`${data.name} berhasil ditambahkan.`);
     } catch (err) {
       console.error(err);
-      showToast("Gagal menambahkan karyawan.");
+      showToast("Gagal menambahkan employee.");
     }
   };
 
@@ -793,10 +796,10 @@ export function EmployeesPage() {
             ? {
               ...e,
               ...restData,
-              status: updated.status ?? "Aktif",
+              status: updated.status ?? "Active",
               email: updated.email ?? data.email,
               joinDate: resolveJoinDate(updated),
-              authRole: (updated.auth_role as AuthRole) ?? "karyawan",
+              authRole: (updated.auth_role as AuthRole) ?? "employee",
             }
             : e,
         ),
@@ -820,7 +823,7 @@ export function EmployeesPage() {
       showToast(`${name} telah dihapus.`);
     } catch (err) {
       console.error(err);
-      showToast("Gagal menghapus karyawan.");
+      showToast("Gagal menghapus employee.");
     }
   };
 
@@ -828,29 +831,29 @@ export function EmployeesPage() {
 
   const SortIcon = ({ col }: { col: SortKey }) => (
     <span className="inline-flex flex-col ml-1 opacity-40">
-      <ChevronUp size={10} className={sortKey === col && sortDir === "asc" ? "opacity-100 text-blue-600" : ""} />
-      <ChevronDown size={10} className={sortKey === col && sortDir === "desc" ? "opacity-100 text-blue-600" : ""} style={{ marginTop: -3 }} />
+      <ChevronUp size={10} className={sortKey === col && sortDir === "asc" ? "opacity-100 text-slate-900" : ""} />
+      <ChevronDown size={10} className={sortKey === col && sortDir === "desc" ? "opacity-100 text-slate-900" : ""} style={{ marginTop: -3 }} />
     </span>
   );
 
   const thCls = "px-5 py-3.5 text-left text-xs text-gray-400 uppercase tracking-wider font-medium select-none";
-  const totalAktif = records.filter((r) => r.status === "Aktif").length;
+  const totalActive = records.filter((r) => r.status === "Active").length;
 
   return (
     <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-gray-900 font-semibold text-lg">Karyawan</h1>
+          <h1 className="text-gray-900 font-semibold text-lg">Employee</h1>
           <p className="text-gray-400 text-sm mt-0.5">
-            {records.length} total · {totalAktif} aktif
+            {records.length} total · {totalActive} aktif
           </p>
         </div>
         <button
           onClick={() => setModal({ type: "add" })}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
         >
-          <Plus size={15} /> Tambah Karyawan
+          <Plus size={15} /> Tambah Employee
         </button>
       </div>
 
@@ -863,18 +866,18 @@ export function EmployeesPage() {
             placeholder="Cari nama, ID, jabatan…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 bg-white text-gray-700 placeholder-gray-400 transition"
+            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-blue-400 bg-white text-gray-700 placeholder-gray-400 transition"
           />
         </div>
         <div className="flex items-center gap-1.5">
-          {(["All", "Aktif", "Cuti", "Nonaktif", "Dijadwalkan"] as const).map(
+          {(["All", "Active", "Leave", "Inactive", "Scheduled"] as const).map(
             (s) => (
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
                 className={`px-3 py-2 text-xs rounded-lg font-medium transition-colors duration-150 whitespace-nowrap ${statusFilter === s
-                  ? "bg-blue-600 text-white"
-                  : "bg-white border border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600"
+                  ? "bg-slate-900 text-white"
+                  : "bg-white border border-gray-200 text-gray-500 hover:border-slate-300 hover:text-slate-900"
                   }`}
               >
                 {s === "All" ? "Semua" : s}
@@ -932,7 +935,7 @@ export function EmployeesPage() {
                     colSpan={7}
                     className="text-center py-14 text-gray-400 text-sm"
                   >
-                    Memuat data dari database…
+                    Memuat data of database…
                   </td>
                 </tr>
               </tbody>
@@ -941,7 +944,7 @@ export function EmployeesPage() {
                 {filtered.map((emp, idx) => (
                   <tr
                     key={emp.id}
-                    className="hover:bg-blue-50/30 transition-colors duration-100"
+                    className="hover:bg-slate-100/30 transition-colors duration-100"
                   >
                     <td className="px-5 py-4">
                       <span className="text-xs font-mono text-gray-400 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-md">
@@ -979,7 +982,7 @@ export function EmployeesPage() {
                           onClick={() =>
                             setModal({ type: "edit", employee: emp })
                           }
-                          className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
                           title="Edit"
                         >
                           <Pencil size={14} />
@@ -1008,7 +1011,7 @@ export function EmployeesPage() {
               <Search className="w-5 h-5 text-gray-400" />
             </div>
             <p className="text-gray-500 text-sm font-medium">
-              Tidak ada karyawan ditemukan
+              Tidak ada employee ditemukan
             </p>
             <p className="text-gray-400 text-xs mt-1">
               Coba ubah kata kunci atau filter status.
@@ -1019,7 +1022,7 @@ export function EmployeesPage() {
         {!isLoading && filtered.length > 0 && (
           <div className="px-5 py-3 border-t border-gray-50 flex items-center justify-between">
             <p className="text-xs text-gray-400">
-              Menampilkan {filtered.length} dari {records.length} karyawan
+              Showing {filtered.length} of {records.length} employee
             </p>
             <p className="text-xs text-gray-400">
               Diurutkan:{" "}
@@ -1033,7 +1036,7 @@ export function EmployeesPage() {
       {/* Modals */}
       {modal.type === "add" && (
         <Modal
-          title="Tambah Karyawan Baru"
+          title="Tambah Employee Baru"
           onClose={() => setModal({ type: "none" })}
         >
           <EmployeeForm
@@ -1046,7 +1049,7 @@ export function EmployeesPage() {
       )}
 
       {modal.type === "edit" && (
-        <Modal title="Edit Karyawan" onClose={() => setModal({ type: "none" })}>
+        <Modal title="Edit Employee" onClose={() => setModal({ type: "none" })}>
           <EmployeeForm
             mode="edit"
             employeeId={modal.employee.employeeId}

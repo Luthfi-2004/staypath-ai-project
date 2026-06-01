@@ -8,6 +8,7 @@ export function AddMemberModal({ teamId, onClose, onSuccess }: { teamId: string,
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [selectedEmpId, setSelectedEmpId] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -16,8 +17,8 @@ export function AddMemberModal({ teamId, onClose, onSuccess }: { teamId: string,
         const res = await fetch(`${API_URL}/api/employees`);
         if (res.ok) {
           const data = await res.json();
-          // Filter employees who are not already in this team and are 'karyawan'
-          const available = data.filter((emp: any) => emp.team_id != parseInt(teamId) && emp.auth_role === 'karyawan');
+          // Filter employees who are not already in this team and are 'employee'
+          const available = data.filter((emp: any) => emp.team_id != parseInt(teamId) && emp.auth_role === "employee");
           setEmployees(available);
           if (available.length > 0) {
             setSelectedEmpId(available[0].id.toString());
@@ -78,7 +79,7 @@ export function AddMemberModal({ teamId, onClose, onSuccess }: { teamId: string,
 
           {loading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+              <Loader2 className="w-6 h-6 text-slate-900 animate-spin" />
             </div>
           ) : employees.length === 0 ? (
             <div className="text-center py-8 text-slate-500 text-sm">
@@ -88,18 +89,30 @@ export function AddMemberModal({ teamId, onClose, onSuccess }: { teamId: string,
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Select Employee</label>
+                <input
+                  type="text"
+                  placeholder="Cari berdasarkan nama atau peran..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-3 mb-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition"
+                />
                 <select 
                   value={selectedEmpId}
                   onChange={(e) => setSelectedEmpId(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition"
                   required
                 >
-                  {employees.map(emp => (
+                  {employees
+                    .filter(emp => emp.name.toLowerCase().includes(searchQuery.toLowerCase()) || emp.role.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(emp => (
                     <option key={emp.id} value={emp.id}>
                       {emp.name} ({emp.role})
                     </option>
                   ))}
                 </select>
+                {employees.filter(emp => emp.name.toLowerCase().includes(searchQuery.toLowerCase()) || emp.role.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                  <p className="text-xs text-red-500 mt-2">No employees match your search.</p>
+                )}
               </div>
 
               <div className="pt-4 flex gap-3">
@@ -113,7 +126,7 @@ export function AddMemberModal({ teamId, onClose, onSuccess }: { teamId: string,
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition flex items-center justify-center gap-2"
                   disabled={submitting}
                 >
                   {submitting ? <Loader2 size={16} className="animate-spin" /> : "Add to Team"}

@@ -41,7 +41,7 @@ export function ResignationChart() {
         if (!res.ok) throw new Error();
         const employees = await res.json();
 
-        // Kelompokkan karyawan per departemen sebagai proxy "trend"
+        // Kelompokkan employee per departemen sebagai proxy "trend"
         const deptMap: Record<string, { burnout: number[]; satisfaction: number[]; count: number }> = {};
 
         for (const emp of employees) {
@@ -77,7 +77,7 @@ export function ResignationChart() {
       <div className="flex items-start justify-between mb-6">
         <div>
           <h2 className="text-gray-900 font-semibold">Burnout & Kepuasan per Departemen</h2>
-          <p className="text-gray-400 text-sm mt-0.5">Rata-rata berdasarkan data karyawan saat ini</p>
+          <p className="text-gray-400 text-sm mt-0.5">Rata-rata berdasarkan data employee saat ini</p>
         </div>
         <div className="flex items-center gap-4 text-xs text-gray-500">
           <span className="flex items-center gap-1.5">
@@ -85,7 +85,7 @@ export function ResignationChart() {
             Burnout (1–10)
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-0.5 rounded-full bg-blue-500 inline-block" />
+            <span className="w-3 h-0.5 rounded-full bg-slate-1000 inline-block" />
             Kepuasan (1–5)
           </span>
         </div>
@@ -97,7 +97,7 @@ export function ResignationChart() {
         </div>
       ) : data.length === 0 ? (
         <div className="flex items-center justify-center h-60 text-gray-400 text-sm">
-          Belum ada data karyawan.
+          No employee data available.
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={240}>

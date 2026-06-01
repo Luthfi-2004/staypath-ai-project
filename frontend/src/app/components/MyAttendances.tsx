@@ -86,7 +86,7 @@ export function MyAttendances() {
           <button className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-sm font-medium backdrop-blur-md border border-white/20 transition flex items-center gap-2">
             <Download size={16} /> Export
           </button>
-          <button onClick={() => setShowForm(!showForm)} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-lg shadow-blue-900/50">
+          <button onClick={() => setShowForm(!showForm)} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-lg shadow-slate-900/50">
             + Request Leave
           </button>
         </div>
@@ -96,19 +96,27 @@ export function MyAttendances() {
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-6 animate-in slide-in-from-top-4 fade-in">
           <h2 className="text-lg font-bold text-slate-800 mb-4">Request New Leave</h2>
           <form onSubmit={handleLeaveSubmit} className="space-y-4 max-w-2xl">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Start Date</label>
-                <input required type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                <input required type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-slate-900" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">End Date</label>
-                <input required type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                <input required type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-slate-900" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Total Days</label>
+                <div className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 font-bold flex items-center h-[42px]">
+                  {startDate && endDate && new Date(endDate) >= new Date(startDate) ? (
+                    `${Math.ceil(Math.abs(new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1} Days`
+                  ) : "-"}
+                </div>
               </div>
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">Leave Type</label>
-              <select value={leaveType} onChange={e => setLeaveType(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+              <select value={leaveType} onChange={e => setLeaveType(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-slate-900">
                 <option value="Tahunan">Annual Leave</option>
                 <option value="Sakit">Sick Leave</option>
                 <option value="Penting">Personal Leave</option>
@@ -116,11 +124,11 @@ export function MyAttendances() {
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">Reason</label>
-              <textarea required rows={2} value={reason} onChange={e => setReason(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+              <textarea required rows={2} value={reason} onChange={e => setReason(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-slate-900"></textarea>
             </div>
             <div className="flex gap-2 justify-end mt-4">
               <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-sm text-slate-600 hover:bg-slate-100 rounded-xl font-bold transition">Cancel</button>
-              <button type="submit" disabled={submitting} className="px-5 py-2.5 text-sm bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition flex items-center gap-2">
+              <button type="submit" disabled={submitting} className="px-5 py-2.5 text-sm bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition flex items-center gap-2">
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Submit Request"}
               </button>
             </div>
@@ -141,7 +149,7 @@ export function MyAttendances() {
             </div>
           </div>
           <div className="p-6 flex-1 bg-slate-50/50">
-            {loading ? <div className="flex justify-center p-4"><Loader2 className="animate-spin text-blue-500"/></div> : 
+            {loading ? <div className="flex justify-center p-4"><Loader2 className="animate-spin text-slate-900"/></div> : 
               attendances.length === 0 ? <p className="text-slate-500 text-sm text-center">No attendance records yet.</p> :
               <div className="space-y-3">
                 {attendances.slice(0, 5).map(att => (
@@ -171,14 +179,14 @@ export function MyAttendances() {
             </div>
           </div>
           <div className="p-6 flex-1 bg-slate-50/50">
-            {loading ? <div className="flex justify-center p-4"><Loader2 className="animate-spin text-blue-500"/></div> : 
+            {loading ? <div className="flex justify-center p-4"><Loader2 className="animate-spin text-slate-900"/></div> : 
               leaves.length === 0 ? <p className="text-slate-500 text-sm text-center">No leave requests yet.</p> :
               <div className="space-y-3">
                 {leaves.slice(0, 5).map(lv => (
                   <div key={lv.id} className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><Calendar size={16}/></div>
+                        <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 flex items-center justify-center"><Calendar size={16}/></div>
                         <div>
                           <p className="font-bold text-slate-800 text-sm">{lv.leave_type}</p>
                           <p className="text-xs text-slate-500">{lv.reason}</p>
@@ -192,7 +200,12 @@ export function MyAttendances() {
                       </span>
                     </div>
                     <div className="mt-3 pt-3 border-t border-slate-100 flex justify-between text-xs text-slate-500">
-                      <span>{new Date(lv.start_date).toLocaleDateString('en-US', {month:'short', day:'numeric'})} - {new Date(lv.end_date).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</span>
+                      <div className="flex items-center gap-2">
+                        <span>{new Date(lv.start_date).toLocaleDateString('en-US', {month:'short', day:'numeric'})} - {new Date(lv.end_date).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</span>
+                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                          Total: {Math.ceil(Math.abs(new Date(lv.end_date).getTime() - new Date(lv.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1} Days
+                        </span>
+                      </div>
                       <span>Requested: {new Date(lv.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</span>
                     </div>
                   </div>

@@ -14,7 +14,7 @@ export function MeetingFormModal({ onClose, onSuccess }: { onClose: () => void; 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !date || !time) return setError("Judul, Tanggal, dan Waktu wajib diisi.");
+    if (!title || !date || !time) return setError("Title, Date, and Time are required.");
     
     setLoading(true);
     try {
@@ -45,37 +45,37 @@ export function MeetingFormModal({ onClose, onSuccess }: { onClose: () => void; 
           
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1.5">Meeting Title</label>
-            <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400" placeholder="e.g. Monthly Sync" />
+            <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-blue-400" placeholder="e.g. Monthly Sync" />
           </div>
           
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1.5">Date</label>
-              <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400" />
+              <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-blue-400" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1.5">Time</label>
-              <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400" />
+              <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-blue-400" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1.5">Type</label>
-              <select value={type} onChange={e => setType(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400">
+              <select value={type} onChange={e => setType(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-blue-400">
                 <option value="Online">Online</option>
                 <option value="Offline">Offline</option>
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1.5">Participants</label>
-              <input type="text" value={participants} onChange={e => setParticipants(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-400" placeholder="e.g. Engineering Team" />
+              <input type="text" value={participants} onChange={e => setParticipants(e.target.value)} className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-blue-400" placeholder="e.g. Engineering Team" />
             </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:bg-gray-100 rounded-lg font-medium transition">Cancel</button>
-            <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium transition flex items-center gap-2">
+            <button type="submit" disabled={loading} className="px-4 py-2 text-sm bg-slate-900 text-white hover:bg-slate-800 rounded-lg font-medium transition flex items-center gap-2">
               {loading ? "Scheduling..." : "Schedule Meeting"}
             </button>
           </div>
