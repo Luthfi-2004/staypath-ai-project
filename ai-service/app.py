@@ -36,7 +36,7 @@ model = tf.keras.models.load_model(
 with open('metadata.json', 'r') as f:
     metadata = json.load(f)
 
-print("✅ Model siap!")
+print("[SUCCESS] Model siap!")
 
 # ── Endpoint prediksi ──────────────────────────────────────────────────────────
 @app.route('/api/predict-risk', methods=['POST'])

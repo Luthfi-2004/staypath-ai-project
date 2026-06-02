@@ -5,11 +5,11 @@ import { Activity, Loader2, AlertCircle, Mail, Lock } from "lucide-react";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 export function LoginPage() {
-  const navigate            = useNavigate();
-  const [email, setEmail]   = useState("");
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
   const [password, setPass] = useState("");
-  const [error, setError]   = useState("");
-  const [loading, setLoad]  = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoad] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,8 +22,8 @@ export function LoginPage() {
 
     setLoad(true);
     try {
-      const res  = await fetch(`${API_URL}/api/auth/login`, {
-        method:  "POST",
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
@@ -35,19 +35,21 @@ export function LoginPage() {
         return;
       }
 
-      // Simpan session
-      localStorage.setItem("employee_id",    String(data.id));
-      localStorage.setItem("employee_name",  data.name);
+      // Save session
+      localStorage.setItem("employee_id", String(data.id));
+      localStorage.setItem("employee_name", data.name);
       localStorage.setItem("employee_email", data.email);
-      localStorage.setItem("role",           data.auth_role);
-      
-      localStorage.setItem("employee_status", data.status || "Aktif");
 
-      // Arahkan berdasarkan role dari DB
-      if (data.auth_role === "hrd") {
+      const roleToSave = data.auth_role === "karyawan" ? "employee" : data.auth_role;
+      localStorage.setItem("role", roleToSave);
+
+      localStorage.setItem("employee_status", data.status || "Active");
+
+      // Arahkan berdasarkan role of DB
+      if (roleToSave === "hrd") {
         navigate("/dashboard");
       } else {
-        navigate("/dashboard/dailypulse");
+        navigate("/dashboard");
       }
 
     } catch {
@@ -63,17 +65,17 @@ export function LoginPage() {
 
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shadow-sm">
             <Activity className="w-5 h-5 text-white" strokeWidth={2.5} />
           </div>
           <div>
-            <p className="text-gray-900 font-bold text-lg leading-tight tracking-tight">StayPath AI</p>
+            <p className="font-heading text-gray-900 font-bold text-lg leading-tight tracking-tight">StayPath AI</p>
             <p className="text-gray-400 text-xs">HR Analytics Platform</p>
           </div>
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-          <h1 className="text-gray-900 font-semibold text-xl mb-1">Masuk ke Dashboard</h1>
+          <h1 className="text-gray-900 font-semibold text-xl mb-1">Login to Dashboard</h1>
           <p className="text-gray-400 text-sm mb-6">
             Masukkan email dan password yang diberikan oleh HR.
           </p>
@@ -93,7 +95,7 @@ export function LoginPage() {
                   onChange={(e) => { setEmail(e.target.value); setError(""); }}
                   placeholder="nama@company.com"
                   autoComplete="email"
-                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 text-gray-700 bg-white transition"
+                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-blue-400 text-gray-700 bg-white transition"
                 />
               </div>
             </div>
@@ -111,7 +113,7 @@ export function LoginPage() {
                   onChange={(e) => { setPass(e.target.value); setError(""); }}
                   placeholder="Masukkan password"
                   autoComplete="current-password"
-                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 text-gray-700 bg-white transition"
+                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-blue-400 text-gray-700 bg-white transition"
                 />
               </div>
             </div>
@@ -128,20 +130,20 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 mt-1"
+              className="w-full py-3 bg-slate-900 hover:bg-slate-800 disabled:bg-blue-400 text-white text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 mt-1"
             >
               {loading
-                ? <><Loader2 size={16} className="animate-spin" /> Memverifikasi…</>
-                : "Masuk"
+                ? <><Loader2 size={16} className="animate-spin" /> Processing...</>
+                : "Login"
               }
             </button>
           </form>
 
           {/* Info */}
           <div className="mt-5 p-3 bg-gray-50 rounded-lg border border-gray-100">
-            <p className="text-xs text-gray-400 font-medium mb-1">Belum punya akun?</p>
+            <p className="text-xs text-gray-400 font-medium mb-1">Don't have an account?</p>
             <p className="text-xs text-gray-400">
-              Hubungi tim HR untuk mendapatkan email dan password login.
+              Contact the HR team to get your login email and password.
             </p>
           </div>
         </div>

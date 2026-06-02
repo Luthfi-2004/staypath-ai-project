@@ -1,5 +1,6 @@
 import { useState, useId } from "react";
-import { User, SlidersHorizontal, Check, Mail, UserCircle2, Lock, Loader2, Eye, EyeOff } from "lucide-react";
+import { User, SlidersHorizontal, Check, Mail, UserCircle2, Lock, Loader2, Eye, EyeOff, Cpu } from "lucide-react";
+import { AIProfileSurvey } from "./AIProfileSurvey";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
@@ -23,13 +24,13 @@ function Toggle({ id, checked, onChange, label, description }: {
         <input id={id} type="checkbox" checked={checked}
           onChange={(e) => onChange(e.target.checked)} className="sr-only peer" />
         <div className={`w-12 h-6 rounded-full border-2 transition-all duration-200 ${
-          checked ? "bg-blue-600 border-blue-600" : "bg-gray-100 border-gray-200 group-hover:border-gray-300"
+          checked ? "bg-slate-900 border-slate-900" : "bg-gray-100 border-gray-200 group-hover:border-gray-300"
         }`} />
         <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-md
           transition-transform duration-200 ease-in-out ${checked ? "translate-x-6" : "translate-x-0"}`}>
           {checked && (
             <div className="flex items-center justify-center w-full h-full">
-              <Check size={10} className="text-blue-600 stroke-[3]" />
+              <Check size={10} className="text-slate-900 stroke-[3]" />
             </div>
           )}
         </div>
@@ -53,7 +54,7 @@ function Field({ label, hint, children }: {
 }
 
 const inputCls = (readOnly?: boolean) =>
-  `w-full px-4 py-3 text-sm rounded-xl border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 ${
+  `w-full px-4 py-3 text-sm rounded-xl border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-blue-400 ${
     readOnly
       ? "bg-gray-50 border-gray-100 text-gray-400 cursor-not-allowed"
       : "bg-white border-gray-200 text-gray-800 hover:border-gray-300"
@@ -69,7 +70,7 @@ function Section({ title, description, icon, children }: {
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
       {/* Header */}
       <div className="px-8 py-6 border-b border-gray-100 flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
           {icon}
         </div>
         <div>
@@ -91,6 +92,7 @@ export function SettingsPage() {
   const employeeId    = localStorage.getItem("employee_id")    || "";
   const employeeName  = localStorage.getItem("employee_name")  || "";
   const employeeEmail = localStorage.getItem("employee_email") || "";
+  const role          = localStorage.getItem("role") || "";
 
   const [name, setName] = useState(employeeName);
 
@@ -146,19 +148,19 @@ export function SettingsPage() {
 
       {/* Page title */}
       <div className="pb-2">
-        <h1 className="text-gray-900 font-semibold text-xl">Pengaturan</h1>
+        <h1 className="text-gray-900 font-semibold text-xl">Settings</h1>
         <p className="text-gray-400 text-sm mt-1">Kelola akun dan preferensi notifikasi kamu.</p>
       </div>
 
       {/* ── Profil ── */}
       <Section
-        icon={<User size={18} className="text-blue-600" />}
-        title="Informasi Profil"
+        icon={<User size={18} className="text-slate-900" />}
+        title="Profile Information"
         description="Nama tampilan dan detail akun kamu"
       >
         {/* Avatar row */}
         <div className="flex items-center gap-5 mb-8 pb-7 border-b border-gray-100">
-          <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+          <div className="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 shadow-sm">
             <span className="text-blue-700 font-bold text-lg">{initials}</span>
           </div>
           <div>
@@ -196,18 +198,18 @@ export function SettingsPage() {
           <button
             onClick={handleSaveProfile}
             disabled={saveProfile !== "idle"}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:bg-blue-400 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
             {saveProfile === "saving" && <Loader2 size={15} className="animate-spin" />}
             {saveProfile === "saved"  && <Check size={15} />}
-            {saveProfile === "idle" ? "Simpan" : saveProfile === "saving" ? "Menyimpan…" : "Tersimpan!"}
+            {saveProfile === "idle" ? "Save" : saveProfile === "saving" ? "Saving..." : "Saved!"}
           </button>
         </div>
       </Section>
 
       {/* ── Ganti Password ── */}
       <Section
-        icon={<Lock size={18} className="text-blue-600" />}
+        icon={<Lock size={18} className="text-slate-900" />}
         title="Ganti Password"
         description="Perbarui password login kamu"
       >
@@ -259,18 +261,33 @@ export function SettingsPage() {
           <button
             onClick={handleSavePass}
             disabled={savePass !== "idle"}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:bg-blue-400 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
             {savePass === "saving" && <Loader2 size={15} className="animate-spin" />}
             {savePass === "saved"  && <Check size={15} />}
-            {savePass === "idle" ? "Ganti Password" : savePass === "saving" ? "Menyimpan…" : "Berhasil!"}
+            {savePass === "idle" ? "Ganti Password" : savePass === "saving" ? "Saving..." : "Berhasil!"}
           </button>
         </div>
       </Section>
 
+      {/* ── Profil AI (Khusus Employee) ── */}
+      {role === "employee" && (
+        <Section
+          icon={<Cpu size={18} className="text-slate-900" />}
+          title="AI Usage Profile"
+          description="Atur preferensi dan data pemakaian AI kamu"
+        >
+          {/* Karena AIProfileSurvey punya container dan title sendiri, kita re-use komponennya 
+              dengan menyembunyikan border/bayangan di CSS atau biarkan saja nested */}
+          <div className="-mx-8 -my-7">
+             <AIProfileSurvey />
+          </div>
+        </Section>
+      )}
+
       {/* ── Preferensi ── */}
       <Section
-        icon={<SlidersHorizontal size={18} className="text-blue-600" />}
+        icon={<SlidersHorizontal size={18} className="text-slate-900" />}
         title="Preferensi Notifikasi"
         description="Atur notifikasi yang kamu terima"
       >
@@ -290,7 +307,7 @@ export function SettingsPage() {
               checked={riskAlerts}
               onChange={setRiskAlerts}
               label="Alert Risiko Tinggi"
-              description="Dapatkan notifikasi saat ada karyawan yang masuk kategori risiko resign tinggi."
+              description="Get notified when an employee is categorized as high resignation risk."
             />
           </div>
         </div>

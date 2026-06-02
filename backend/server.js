@@ -7,7 +7,11 @@ const authRoutes      = require('./routes/authRoutes');
 const employeeRoutes  = require('./routes/employeeRoutes');
 const pulseRoutes     = require('./routes/pulseRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
-const aiRoutes     = require('./routes/aiRoutes');  // aktifkan setelah AI siap
+const aiRoutes        = require('./routes/aiRoutes');
+const attendanceRoutes= require('./routes/attendanceRoutes');
+const leaveRoutes     = require('./routes/leaveRoutes');
+const teamRoutes      = require('./routes/teamRoutes');
+const meetingRoutes   = require('./routes/meetingRoutes');
 
 const app = express();
 
@@ -22,7 +26,11 @@ app.use('/api/auth',      authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/pulse',     pulseRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/ai',     aiRoutes);
+app.use('/api/ai',        aiRoutes);
+app.use('/api/attendance',attendanceRoutes);
+app.use('/api/leaves',    leaveRoutes);
+app.use('/api/teams',     teamRoutes);
+app.use('/api/meetings',  meetingRoutes);
 
 // ── Start (local dev) ──────────────────────────────────────────────────────────
 if (process.env.NODE_ENV !== 'production') {

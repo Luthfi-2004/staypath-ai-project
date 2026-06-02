@@ -13,7 +13,7 @@ router.post('/login', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('employees')
-      .select('id, name, email, auth_role, department, job_title, status')
+      .select('id, name, email, auth_role, department, role, status')
       .eq('email', email.toLowerCase().trim())
       .eq('password', password)
       .single();
@@ -32,7 +32,7 @@ router.post('/login', async (req, res) => {
       email:      data.email,
       auth_role:  data.auth_role,
       department: data.department,
-      job_title:  data.job_title,
+      job_title:  data.role,
     });
 
   } catch (err) {

@@ -5,32 +5,47 @@ import { DashboardPage } from "./components/DashboardPage";
 import { EmployeesPage } from "./components/EmployeesPage";
 import { Predictions } from "./components/Predictions";
 import { SettingsPage } from "./components/SettingsPage";
-import { DailyPulse } from "./components/DailyPulse";
+import { DashboardEmployee } from "./components/DashboardKaryawan";
+import { ClockInOut } from "./components/ClockInOut";
+import { MyAttendances } from "./components/MyAttendances";
+import { MyTeam } from "./components/MyTeam";
+import { Projects } from "./components/Projects";
+import { TeamsHR } from "./components/TeamsHR";
+import { AttendanceHR } from "./components/AttendanceHR";
 import {
   Menu, LayoutDashboard, Users, TrendingUp,
-  Settings, HeartPulse, Cpu, Calendar, LogOut, ChevronDown,
+  Settings, HeartPulse, Cpu, Calendar, LogOut, ChevronDown, Clock, FileText, Folder
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type PageId = "dashboard" | "employees" | "predictions" | "dailypulse" | "settings";
-type Role   = "hrd" | "karyawan" | null;
+type PageId = "dashboard" | "ourteams" | "employees" | "attendance" | "predictions" | "dailypulse" | "leaverequests" | "settings" | "clockinout" | "myattendances" | "myteam" | "projects" | "payroll" | "reports";
+type Role = "hrd" | "employee" | null;
 
 interface PageMeta {
-  title:    string;
+  title: string;
   subtitle: string;
-  icon:     React.ElementType;
+  icon: React.ElementType;
 }
 
 const PAGE_META: Record<PageId, PageMeta> = {
-  dashboard:   { title: "Dashboard",   subtitle: "Selamat datang",                  icon: LayoutDashboard },
-  employees:   { title: "Karyawan",    subtitle: "Kelola data karyawan",            icon: Users           },
-  predictions: { title: "Prediksi",    subtitle: "Forecasting attrisi berbasis AI", icon: TrendingUp      },
-  dailypulse:  { title: "Daily Pulse", subtitle: "Check-in harian kamu",            icon: HeartPulse      },
-  settings:    { title: "Pengaturan",  subtitle: "Akun & preferensi",               icon: Settings        },
+  dashboard: { title: "Dashboard", subtitle: "Selamat datang", icon: LayoutDashboard },
+  ourteams: { title: "Our Teams", subtitle: "Manage teams", icon: Users },
+  employees: { title: "Employees", subtitle: "Manage workforce", icon: Users },
+  attendance: { title: "Attendance", subtitle: "Review clock records", icon: Calendar },
+  predictions: { title: "Predictions", subtitle: "AI-based attrition forecasting", icon: TrendingUp },
+  dailypulse: { title: "Absensi", subtitle: "Clock-in dan Pulse harian", icon: HeartPulse },
+  leaverequests: { title: "Leave Request", subtitle: "Ajukan izin atau cuti", icon: Settings },
+  clockinout: { title: "Clock In/Out", subtitle: "Record working time", icon: Clock },
+  myattendances: { title: "My Attendances", subtitle: "Attendance history", icon: FileText },
+  myteam: { title: "My Team", subtitle: "Colleagues in department", icon: Users },
+  projects: { title: "Projects", subtitle: "Coming Soon", icon: Folder },
+  payroll: { title: "Payroll", subtitle: "Coming Soon", icon: FileText },
+  reports: { title: "Reports", subtitle: "Coming Soon", icon: FileText },
+  settings: { title: "Settings Profil", subtitle: "Akun & preferensi", icon: Settings },
 };
 
-const HRD_ONLY: PageId[] = ["dashboard", "employees", "predictions", "settings"];
+const HRD_ONLY: PageId[] = ["ourteams", "employees", "attendance", "predictions", "payroll", "reports"];
 
 function todayLabel() {
   return new Date().toLocaleDateString("id-ID", {
@@ -65,8 +80,8 @@ function TopbarMeta({ page }: { page: PageId }) {
 
 // ─── User dropdown (menggantikan tombol logout terpisah) ──────────────────────
 
-function UserDropdown({ name, role, onLogout }: {
-  name: string; role: Role; onLogout: () => void;
+function UserDropdown({ name, role, onLogout, onNavigate }: {
+  name: string; role: Role; onLogout: () => void; onNavigate: (page: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -88,14 +103,14 @@ function UserDropdown({ name, role, onLogout }: {
         className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-100 transition-colors"
       >
         {/* Avatar */}
-        <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+        <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
           <span className="text-blue-700 text-[11px] font-bold">{initials}</span>
         </div>
         {/* Name + role — hidden on small screens */}
         <div className="hidden md:block text-left">
           <p className="text-xs font-semibold text-gray-800 leading-tight">{name}</p>
           <p className="text-[10px] text-gray-400 leading-tight">
-            {role === "hrd" ? "HRD" : "Karyawan"}
+            {role === "hrd" ? "HRD" : "Employee"}
           </p>
         </div>
         <ChevronDown size={13} className={`text-gray-400 transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
@@ -107,13 +122,13 @@ function UserDropdown({ name, role, onLogout }: {
           {/* User info */}
           <div className="px-4 py-3.5 border-b border-gray-100">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
                 <span className="text-blue-700 text-xs font-bold">{initials}</span>
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-gray-800 truncate">{name}</p>
                 <p className="text-xs text-gray-400 truncate">
-                  {role === "hrd" ? "HR Department" : "Karyawan"}
+                  {role === "hrd" ? "HR Department" : "Employee"}
                 </p>
               </div>
             </div>
@@ -122,11 +137,18 @@ function UserDropdown({ name, role, onLogout }: {
           {/* Actions */}
           <div className="p-1.5">
             <button
+              onClick={() => { onNavigate("settings"); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors font-medium mb-1"
+            >
+              <Settings size={15} />
+              Settings Profil
+            </button>
+            <button
               onClick={() => { onLogout(); setOpen(false); }}
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50 transition-colors font-medium"
             >
               <LogOut size={15} />
-              Keluar
+              Logout
             </button>
           </div>
         </div>
@@ -141,8 +163,12 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [role, setRole]             = useState<Role>(localStorage.getItem("role") as Role);
-  const [employeeName, setEmpName]  = useState(localStorage.getItem("employee_name") || "User");
+  const [role, setRole] = useState<Role>(() => {
+    const r = localStorage.getItem("role");
+    if (r === "karyawan") return "employee";
+    return r as Role;
+  });
+  const [employeeName, setEmpName] = useState(localStorage.getItem("employee_name") || "User");
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
@@ -151,17 +177,26 @@ export default function App() {
 
   const getPageFromPath = (): PageId => {
     const path = location.pathname;
-    if (path.includes("/employees"))   return "employees";
+    if (path.includes("/ourteams")) return "ourteams";
+    if (path.includes("/employees")) return "employees";
+    if (path.includes("/attendance")) return "attendance";
     if (path.includes("/predictions")) return "predictions";
-    if (path.includes("/dailypulse"))  return "dailypulse";
-    if (path.includes("/settings"))    return "settings";
+    if (path.includes("/dailypulse")) return "dailypulse";
+    if (path.includes("/leaverequests")) return "leaverequests";
+    if (path.includes("/clockinout")) return "clockinout";
+    if (path.includes("/myattendances")) return "myattendances";
+    if (path.includes("/myteam")) return "myteam";
+    if (path.includes("/projects")) return "projects";
+    if (path.includes("/payroll")) return "payroll";
+    if (path.includes("/reports")) return "reports";
+    if (path.includes("/settings")) return "settings";
     return "dashboard";
   };
 
   const activePage = getPageFromPath();
 
   const handleNavigate = (page: string) => {
-    if (role === "karyawan" && HRD_ONLY.includes(page as PageId)) return;
+    if (role === "employee" && HRD_ONLY.includes(page as PageId)) return;
     navigate(page === "dashboard" ? "/dashboard" : `/dashboard/${page}`);
     setMobileOpen(false);
   };
@@ -181,8 +216,8 @@ export default function App() {
   const meta = PAGE_META[activePage];
   const Icon = meta.icon;
 
-  if (role === "karyawan" && HRD_ONLY.includes(activePage)) {
-    navigate("/dashboard/dailypulse");
+  if (role === "employee" && HRD_ONLY.includes(activePage)) {
+    navigate("/dashboard");
     return null;
   }
 
@@ -195,8 +230,6 @@ export default function App() {
           activePage={activePage}
           onNavigate={handleNavigate}
           role={role}
-          employeeName={employeeName}
-          onLogout={handleLogout}
         />
       </aside>
 
@@ -209,8 +242,6 @@ export default function App() {
               activePage={activePage}
               onNavigate={handleNavigate}
               role={role}
-              employeeName={employeeName}
-              onLogout={handleLogout}
               onClose={() => setMobileOpen(false)}
             />
           </aside>
@@ -233,11 +264,11 @@ export default function App() {
 
           {/* Page title */}
           <div className="flex items-center gap-2.5 flex-1 min-w-0">
-            <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-              <Icon size={14} className="text-blue-600" />
+            <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+              <Icon size={14} className="text-slate-900" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-gray-900 text-sm font-semibold leading-tight truncate">{meta.title}</h1>
+              <h1 className="text-gray-900 text-sm font-semibold leading-tight truncate font-heading">{meta.title}</h1>
               <p className="text-gray-400 text-[11px] leading-tight hidden sm:block">{meta.subtitle}</p>
             </div>
           </div>
@@ -246,21 +277,31 @@ export default function App() {
           <TopbarMeta page={activePage} />
 
           {/* User dropdown — satu-satunya aksi di kanan atas */}
-          <UserDropdown name={employeeName} role={role} onLogout={handleLogout} />
+          <UserDropdown name={employeeName} role={role} onLogout={handleLogout} onNavigate={handleNavigate} />
         </header>
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-            {role === "karyawan" ? (
-              <DailyPulse />
+            {role === "employee" ? (
+              <>
+                {activePage === "dashboard" && <DashboardEmployee onNavigate={handleNavigate} />}
+                {activePage === "clockinout" && <ClockInOut />}
+                {activePage === "myattendances" && <MyAttendances />}
+                {activePage === "myteam" && <MyTeam />}
+                {activePage === "projects" && <Projects />}
+                {activePage === "settings" && <SettingsPage />}
+              </>
             ) : (
               <>
-                {activePage === "dashboard"   && <DashboardPage />}
-                {activePage === "employees"   && <EmployeesPage />}
+                {activePage === "dashboard" && <DashboardPage onNavigate={handleNavigate} />}
+                {activePage === "ourteams" && <TeamsHR />}
+                {activePage === "employees" && <EmployeesPage />}
+                {activePage === "attendance" && <AttendanceHR />}
                 {activePage === "predictions" && <Predictions />}
-                {activePage === "dailypulse"  && <DailyPulse />}
-                {activePage === "settings"    && <SettingsPage />}
+                {activePage === "payroll" && <Projects />}
+                {activePage === "reports" && <Projects />}
+                {activePage === "settings" && <SettingsPage />}
               </>
             )}
           </div>

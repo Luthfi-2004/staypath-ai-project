@@ -166,11 +166,71 @@ const updateEmployeeStatus = async (req, res) => {
   }
 };
 
+const updateEmployeeTeam = async (req, res) => {
+  const { id } = req.params;
+  const { team_id } = req.body;
+  try {
+    const { data, error } = await supabase
+      .from('employees')
+      .update({ team_id })
+      .eq('id', id)
+      .select();
+
+    if (error) throw error;
+    res.json(data[0]);
+  } catch (err) {
+    console.error("Gagal update team:", err.message);
+    res.status(500).json({ error: "Gagal update team" });
+  }
+};
+
+// ==========================================
+// 6. UPDATE: Update Profil AI (Khusus Karyawan)
+// ==========================================
+const updateAIProfile = async (req, res) => {
+  const { id } = req.params;
+  const {
+    primary_ai_tool,
+    ai_adoption_stage,
+    fear_of_ai_replacement,
+    productivity_score,
+    ai_tools_used_per_day,
+    hours_with_ai_assistance_daily,
+    ai_replaces_my_tasks_pct,
+    weekly_ai_upskilling_hrs
+  } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from('employees')
+      .update({
+        primary_ai_tool,
+        ai_adoption_stage,
+        fear_of_ai_replacement,
+        productivity_score: parseFloat(productivity_score),
+        ai_tools_used_per_day: parseFloat(ai_tools_used_per_day),
+        hours_with_ai_assistance_daily: parseFloat(hours_with_ai_assistance_daily),
+        ai_replaces_my_tasks_pct: parseFloat(ai_replaces_my_tasks_pct),
+        weekly_ai_upskilling_hrs: parseFloat(weekly_ai_upskilling_hrs)
+      })
+      .eq('id', id)
+      .select();
+
+    if (error) throw error;
+    res.json(data[0]);
+  } catch (err) {
+    console.error("Gagal update AI Profile:", err.message);
+    res.status(500).json({ error: "Gagal update profil AI" });
+  }
+};
+
 // Jangan lupa update export-nya di bawah ini:
 module.exports = { 
   getEmployees, 
   addEmployee, 
   updateEmployee, 
   deleteEmployee, 
-  updateEmployeeStatus // <-- Ini baru
+  updateEmployeeStatus,
+  updateEmployeeTeam,
+  updateAIProfile
 };

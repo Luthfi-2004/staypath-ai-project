@@ -5,7 +5,9 @@ const {
   addEmployee, 
   updateEmployee, 
   deleteEmployee,
-  updateEmployeeStatus // <-- Import fungsi barunya
+  updateEmployeeStatus,
+  updateEmployeeTeam,
+  updateAIProfile
 } = require('../controllers/employeeController');
 
 // Daftar endpoint API karyawan
@@ -15,6 +17,8 @@ router.put('/:id', updateEmployee);
 
 // 🌟 ENDPOINT JALUR KHUSUS 🌟
 router.patch('/:id/status', updateEmployeeStatus); 
+router.patch('/:id/team', updateEmployeeTeam); 
+router.put('/:id/ai-profile', updateAIProfile);
 
 router.delete('/:id', deleteEmployee); 
 

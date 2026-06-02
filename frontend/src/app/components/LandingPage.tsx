@@ -9,8 +9,8 @@ const FEATURES = [
     icon: BrainCircuit,
     title: "Machine Learning Predictions",
     desc: "Our gradient boosting model analyzes engagement signals, mood data, and tenure patterns to surface resignation risk before it becomes a problem.",
-    accent: "bg-blue-50 text-blue-600",
-    border: "hover:border-blue-200",
+    accent: "bg-slate-100 text-slate-900",
+    border: "hover:border-slate-200",
   },
   {
     icon: Activity,
@@ -42,26 +42,35 @@ const TRUST_ITEMS = [
   "14-day free trial",
 ];
 
+const TEAM_MEMBERS = [
+  { name: "Akbar Maulana", role: "Data Scientist", desc: "Menganalisis data HR & prediktif.", avatar: "https://randomuser.me/api/portraits/men/32.jpg" },
+  { name: "Nurul Habibah Gea", role: "Data Scientist", desc: "Membangun model analisis data.", avatar: "https://randomuser.me/api/portraits/women/44.jpg" },
+  { name: "Rafah Fajri Juwaeni", role: "AI Engineer", desc: "Melatih model machine learning.", avatar: "https://randomuser.me/api/portraits/men/46.jpg" },
+  { name: "Rifki Hidayat", role: "AI Engineer", desc: "Mengembangkan algoritma AI.", avatar: "https://randomuser.me/api/portraits/men/75.jpg" },
+  { name: "Luthfi Rafananda Naufal", role: "Full-Stack Web Developer", desc: "Membangun infrastruktur aplikasi.", avatar: "https://randomuser.me/api/portraits/men/11.jpg" },
+  { name: "Samuel Richard Gunawan", role: "Full-Stack Web Developer", desc: "Mengembangkan fitur antarmuka.", avatar: "https://randomuser.me/api/portraits/men/22.jpg" },
+];
+
 export function LandingPage() {
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif" }}>
+    <div className="min-h-screen bg-white">
 
       {/* NAVBAR */}
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#2563eb] flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center shadow-sm">
               <Zap className="w-4 h-4 text-white" fill="white" />
             </div>
-            <span className="text-[#0f1f3d]" style={{ fontWeight: 800, fontSize: "1.05rem", letterSpacing: "-0.01em" }}>
-              StayPath <span className="text-[#2563eb]">AI</span>
+            <span className="text-[#0f1f3d] font-heading" style={{ fontWeight: 800, fontSize: "1.05rem", letterSpacing: "-0.01em" }}>
+              StayPath <span className="text-slate-900">AI</span>
             </span>
           </div>
 
           <nav className="hidden md:flex items-center gap-8">
-            {["Features", "Solutions"].map((link) => (
+            {["Features", "Solutions", "About"].map((link) => (
               <a key={link} href={`#${link.toLowerCase()}`}
-                className="text-gray-500 hover:text-[#0f1f3d] transition-colors"
+                className="text-gray-500 hover:text-[#0f1f3d] transition-colors font-heading"
                 style={{ fontSize: "0.9rem", fontWeight: 500 }}>
                 {link}
               </a>
@@ -70,7 +79,7 @@ export function LandingPage() {
 
           {/* ← GANTI: /dashboard → /login */}
           <Link to="/login"
-            className="flex items-center gap-1.5 bg-[#2563eb] text-white px-5 py-2.5 rounded-xl hover:bg-[#1d4ed8] transition-colors"
+            className="flex items-center gap-1.5 bg-slate-900 text-white px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-colors"
             style={{ fontSize: "0.875rem", fontWeight: 600 }}>
             Login to Dashboard
             <ChevronRight className="w-4 h-4" />
@@ -81,16 +90,16 @@ export function LandingPage() {
       {/* HERO */}
       <section className="pt-24 pb-20 px-6 text-center bg-white">
         <div className="max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-[#2563eb] px-4 py-1.5 rounded-full mb-8"
+          <div className="inline-flex items-center gap-2 bg-slate-100 border border-slate-200 text-slate-900 px-4 py-1.5 rounded-full mb-8"
             style={{ fontSize: "0.78rem", fontWeight: 600 }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#2563eb] animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-900 animate-pulse" />
             AI-Powered HR Intelligence Platform
           </div>
 
           <h1 className="text-[#0f1f3d] mb-6" style={{ fontSize: "clamp(2rem, 5vw, 3.25rem)", fontWeight: 800, lineHeight: 1.15, letterSpacing: "-0.025em" }}>
             Predict and Prevent
             <br />
-            <span className="text-[#2563eb]">Employee Turnover</span> with AI
+            <span className="text-slate-900">Employee Turnover</span> with AI
           </h1>
 
           <p className="text-gray-500 mb-10 max-w-xl mx-auto" style={{ fontSize: "1.1rem", lineHeight: 1.7, fontWeight: 400 }}>
@@ -101,7 +110,7 @@ export function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12">
             {/* ← GANTI: /dashboard → /login */}
             <Link to="/login"
-              className="flex items-center gap-2 bg-[#2563eb] text-white px-7 py-3.5 rounded-xl hover:bg-[#1d4ed8] transition-colors w-full sm:w-auto justify-center"
+              className="flex items-center gap-2 bg-slate-900 text-white px-7 py-3.5 rounded-xl hover:bg-slate-800 transition-colors w-full sm:w-auto justify-center"
               style={{ fontSize: "0.95rem", fontWeight: 600 }}>
               Get Started Free
               <ArrowRight className="w-4 h-4" />
@@ -141,13 +150,13 @@ export function LandingPage() {
             <div className="flex" style={{ minHeight: "260px" }}>
               <div className="w-44 bg-[#0f1f3d] shrink-0 p-4 flex flex-col gap-2">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="w-6 h-6 rounded-lg bg-[#2563eb] flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-lg bg-slate-900 flex items-center justify-center">
                     <Zap className="w-3 h-3 text-white" fill="white" />
                   </div>
-                  <span className="text-white" style={{ fontSize: "0.72rem", fontWeight: 700 }}>StayPath AI</span>
+                  <span className="text-white font-heading" style={{ fontSize: "0.72rem", fontWeight: 700 }}>StayPath AI</span>
                 </div>
                 {["Dashboard", "Daily Pulse", "Employees", "Predictions", "Settings"].map((item, i) => (
-                  <div key={item} className={`px-2.5 py-1.5 rounded-lg flex items-center gap-2 ${i === 0 ? "bg-[#2563eb]" : ""}`}>
+                  <div key={item} className={`px-2.5 py-1.5 rounded-lg flex items-center gap-2 ${i === 0 ? "bg-slate-900" : ""}`}>
                     <div className={`w-1.5 h-1.5 rounded-full ${i === 0 ? "bg-white" : "bg-[#64748b]"}`} />
                     <span className={i === 0 ? "text-white" : "text-[#64748b]"} style={{ fontSize: "0.7rem" }}>{item}</span>
                   </div>
@@ -156,7 +165,7 @@ export function LandingPage() {
               <div className="flex-1 p-5 bg-[#f0f4fb]">
                 <div className="grid grid-cols-3 gap-3 mb-4">
                   {[
-                    { label: "Total Employees", val: "142", color: "text-[#2563eb]", bg: "bg-blue-50" },
+                    { label: "Total Employees", val: "142", color: "text-slate-900", bg: "bg-slate-100" },
                     { label: "High Risk",        val: "12",  color: "text-red-500",   bg: "bg-red-50"  },
                     { label: "Avg Mood",          val: "3.7", color: "text-emerald-600", bg: "bg-emerald-50" },
                   ].map(({ label, val, color, bg }) => (
@@ -201,7 +210,7 @@ export function LandingPage() {
       <section id="features" className="py-24 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-[#2563eb] mb-3" style={{ fontSize: "0.82rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            <p className="text-slate-900 mb-3" style={{ fontSize: "0.82rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
               Platform Features
             </p>
             <h2 className="text-[#0f1f3d] mb-4" style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.25rem)", fontWeight: 800, letterSpacing: "-0.02em" }}>
@@ -226,7 +235,7 @@ export function LandingPage() {
                 <div className="mt-auto pt-2">
                   {/* ← GANTI: /dashboard → /login */}
                   <Link to="/login"
-                    className="flex items-center gap-1 text-[#2563eb] hover:gap-2 transition-all"
+                    className="flex items-center gap-1 text-slate-900 hover:gap-2 transition-all"
                     style={{ fontSize: "0.82rem", fontWeight: 600 }}>
                     Explore feature <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
@@ -242,7 +251,7 @@ export function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
-              <p className="text-[#2563eb] mb-3" style={{ fontSize: "0.82rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              <p className="text-slate-900 mb-3" style={{ fontSize: "0.82rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
                 Why StayPath AI
               </p>
               <h2 className="text-[#0f1f3d] mb-5" style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1.3 }}>
@@ -261,8 +270,8 @@ export function LandingPage() {
                 { icon: Shield,        title: "Built for privacy",          desc: "Anonymized check-ins. GDPR compliant. Your data stays yours." },
               ].map(({ icon: Icon, title, desc }) => (
                 <div key={title} className="flex items-start gap-4 mb-6">
-                  <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 mt-0.5">
-                    <Icon className="w-4 h-4 text-[#2563eb]" />
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <Icon className="w-4 h-4 text-slate-900" />
                   </div>
                   <div>
                     <p className="text-[#0f1f3d] mb-0.5" style={{ fontSize: "0.9rem", fontWeight: 700 }}>{title}</p>
@@ -299,10 +308,40 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* ABOUT (TEAM) */}
+      <section id="about" className="py-24 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-slate-900 mb-3" style={{ fontSize: "0.82rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              Our Team
+            </p>
+            <h2 className="text-[#0f1f3d] mb-4" style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.25rem)", fontWeight: 800, letterSpacing: "-0.02em" }}>
+              Meet the Developers
+            </h2>
+            <p className="text-gray-500 max-w-2xl mx-auto" style={{ fontSize: "1rem", lineHeight: 1.7 }}>
+              We are a 6-person team behind StayPath AI. We combine expertise in AI, software engineering, and design to create modern HR solutions.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {TEAM_MEMBERS.map((member) => (
+              <div key={member.name} className="flex flex-col items-center text-center p-6 border border-gray-100 rounded-3xl bg-gray-50/50 hover:bg-white hover:shadow-xl hover:shadow-gray-100/50 transition-all">
+                <div className="w-24 h-24 rounded-2xl overflow-hidden mb-5 shadow-sm transform -rotate-3 hover:rotate-0 transition-transform bg-slate-100">
+                  <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
+                </div>
+                <h3 className="text-gray-900 font-bold text-lg">{member.name}</h3>
+                <p className="text-slate-900 text-sm font-semibold mb-3">{member.role}</p>
+                <p className="text-gray-500 text-sm leading-relaxed">{member.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA BANNER */}
       <section className="py-24 px-6 bg-[#0f1f3d]">
         <div className="max-w-2xl mx-auto text-center">
-          <div className="w-12 h-12 rounded-2xl bg-[#2563eb] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-900/40">
+          <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-slate-900/40">
             <Zap className="w-6 h-6 text-white" fill="white" />
           </div>
           <h2 className="text-white mb-4" style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)", fontWeight: 800, letterSpacing: "-0.02em" }}>
@@ -315,7 +354,7 @@ export function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             {/* ← GANTI: /dashboard → /login */}
             <Link to="/login"
-              className="flex items-center gap-2 bg-[#2563eb] text-white px-7 py-3.5 rounded-xl hover:bg-[#1d4ed8] transition-colors w-full sm:w-auto justify-center"
+              className="flex items-center gap-2 bg-slate-900 text-white px-7 py-3.5 rounded-xl hover:bg-slate-800 transition-colors w-full sm:w-auto justify-center"
               style={{ fontSize: "0.95rem", fontWeight: 600 }}>
               Get Started Free
               <ArrowRight className="w-4 h-4" />
@@ -334,11 +373,11 @@ export function LandingPage() {
       <footer className="bg-white border-t border-gray-100 px-6 py-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-[#2563eb] flex items-center justify-center">
+            <div className="w-6 h-6 rounded-md bg-slate-900 flex items-center justify-center">
               <Zap className="w-3 h-3 text-white" fill="white" />
             </div>
-            <span className="text-[#0f1f3d]" style={{ fontSize: "0.875rem", fontWeight: 700 }}>
-              StayPath <span className="text-[#2563eb]">AI</span>
+            <span className="text-[#0f1f3d] font-heading" style={{ fontSize: "0.875rem", fontWeight: 700 }}>
+              StayPath <span className="text-slate-900">AI</span>
             </span>
           </div>
           <p className="text-gray-400 text-center" style={{ fontSize: "0.78rem" }}>

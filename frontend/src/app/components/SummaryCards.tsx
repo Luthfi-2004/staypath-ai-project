@@ -31,8 +31,8 @@ export function SummaryCards() {
     load();
   }, []);
 
-  // Mood skala 1-5 dari daily_pulse → tampilkan sebagai X/5
-  // Satisfaction skala 1-5 dari DB
+  // Mood skala 1-5 of daily_pulse → tampilkan sebagai X/5
+  // Satisfaction skala 1-5 of DB
   const moodDisplay = stats?.avgMoodToday != null
     ? `${stats.avgMoodToday} / 5`
     : stats?.avgSatisfaction != null
@@ -46,13 +46,13 @@ export function SummaryCards() {
   const cards = [
     {
       id:         "total",
-      label:      "Total Karyawan",
+      label:      "Total Employee",
       value:      isLoading ? "…" : (stats?.totalEmployees ?? 0).toLocaleString(),
       change:     stats ? `${stats.totalEmployees} terdaftar` : "Memuat…",
       trend:      "up" as const,
       icon:       Users,
-      iconBg:     "bg-blue-50",
-      iconColor:  "text-blue-600",
+      iconBg:     "bg-slate-100",
+      iconColor:  "text-slate-900",
       trendColor: "text-emerald-600",
       trendBg:    "bg-emerald-50",
     },
@@ -61,8 +61,8 @@ export function SummaryCards() {
       label:      "Risiko Resign Tinggi",
       value:      isLoading ? "…" : (stats?.highRiskCount ?? 0).toString(),
       change:     stats?.highRiskCount
-                    ? `${stats.highRiskCount} karyawan High Risk`
-                    : "Belum ada prediksi AI",
+                    ? `${stats.highRiskCount} High Risk employees`
+                    : "No AI predictions yet",
       trend:      "up" as const,
       icon:       AlertTriangle,
       iconBg:     "bg-red-50",
@@ -72,11 +72,11 @@ export function SummaryCards() {
     },
     {
       id:         "mood",
-      label:      "Rata-rata Mood Hari Ini",
+      label:      "Average Mood Today",
       value:      isLoading ? "…" : moodDisplay,
       change:     stats?.pulseCountToday
-                    ? `${stats.pulseCountToday} check-in hari ini`
-                    : "Belum ada check-in hari ini",
+                    ? `${stats.pulseCountToday} check-ins today`
+                    : "No check-ins today",
       trend:      moodTrend,
       icon:       Smile,
       iconBg:     "bg-amber-50",

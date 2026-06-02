@@ -36,10 +36,10 @@ function buildRiskFactors(emp: any): RiskFactor[] {
   if (emp.burnout_score >= 7)                                         factors.push({ label: "Burnout score tinggi",     severity: "high"   });
   if (emp.job_satisfaction_1_5 <= 2)                                  factors.push({ label: "Kepuasan kerja rendah",    severity: "high"   });
   if (emp.fear_of_ai_replacement === "High")                          factors.push({ label: "Takut digantikan AI",      severity: "high"   });
-  if (emp.burnout_score >= 5 && emp.burnout_score < 7)                factors.push({ label: "Burnout sedang",           severity: "medium" });
+  if (emp.burnout_score >= 5 && emp.burnout_score < 7)                factors.push({ label: "Moderate burnout",           severity: "medium" });
   if (emp.weekly_ai_upskilling_hrs >= 8)                              factors.push({ label: "Beban upskilling tinggi",  severity: "medium" });
-  if (emp.ai_replaces_my_tasks_pct >= 50)                             factors.push({ label: "Banyak tugas diganti AI",  severity: "medium" });
-  if (emp.job_satisfaction_1_5 <= 3 && emp.job_satisfaction_1_5 > 2) factors.push({ label: "Kepuasan kerja sedang",    severity: "medium" });
+  if (emp.ai_replaces_my_tasks_pct >= 50)                             factors.push({ label: "Many tasks replaced by AI",  severity: "medium" });
+  if (emp.job_satisfaction_1_5 <= 3 && emp.job_satisfaction_1_5 > 2) factors.push({ label: "Moderate job satisfaction",    severity: "medium" });
   if (factors.length === 0)                                           factors.push({ label: "Risiko rendah",            severity: "low"    });
   return factors.slice(0, 3);
 }
@@ -73,7 +73,7 @@ function mapEmployeeToPrediction(emp: any): Prediction {
 // ─── UI components ────────────────────────────────────────────────────────────
 
 const avatarPalette = [
-  "bg-blue-100 text-blue-700", "bg-violet-100 text-violet-700",
+  "bg-slate-200 text-blue-700", "bg-violet-100 text-violet-700",
   "bg-rose-100 text-rose-600",  "bg-emerald-100 text-emerald-700",
   "bg-amber-100 text-amber-700","bg-cyan-100 text-cyan-700",
 ];
@@ -135,7 +135,7 @@ export function Predictions() {
 
   const isRefreshing = refreshStep >= 0;
 
-  // ── Load awal dari DB ──
+  // ── Load awal of DB ──
   useEffect(() => {
     const load = async () => {
       try {
@@ -180,7 +180,7 @@ export function Predictions() {
 
       setRefreshStep(3);
 
-      // Step 4-5: reload data terbaru dari DB
+      // Step 4-5: reload data terbaru of DB
       setRefreshStep(4);
       const empRes = await fetch(`${API_URL}/api/employees`);
       if (!empRes.ok) throw new Error("Gagal reload data");
@@ -224,8 +224,8 @@ export function Predictions() {
 
   const SortIcon = ({ col }: { col: SortCol }) => (
     <span className="inline-flex flex-col ml-1 opacity-40">
-      <ChevronUp   size={10} className={sortCol === col && sortDir === "asc"  ? "opacity-100 text-blue-600" : ""} />
-      <ChevronDown size={10} className={sortCol === col && sortDir === "desc" ? "opacity-100 text-blue-600" : ""} style={{ marginTop: -3 }} />
+      <ChevronUp   size={10} className={sortCol === col && sortDir === "asc"  ? "opacity-100 text-slate-900" : ""} />
+      <ChevronDown size={10} className={sortCol === col && sortDir === "desc" ? "opacity-100 text-slate-900" : ""} style={{ marginTop: -3 }} />
     </span>
   );
 
@@ -249,7 +249,7 @@ export function Predictions() {
             <Brain size={20} className="text-violet-500" /> Prediksi Risiko Attrisi
           </h1>
           <p className="text-gray-400 text-sm mt-0.5">
-            {isLoading ? "Memuat data…" : `${predictions.length} karyawan dianalisis`}
+            {isLoading ? "Memuat data…" : `${predictions.length} employees analyzed`}
             {lastRefreshed && !isLoading && (
               <span className="ml-2 text-gray-300">· Diperbarui {lastRefreshed}</span>
             )}
@@ -259,7 +259,7 @@ export function Predictions() {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:bg-blue-400 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
           >
             <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
             {isRefreshing
@@ -278,7 +278,7 @@ export function Predictions() {
         {(["all", "high", "medium", "low"] as FilterTab[]).map((tab) => {
           const labels = { all: "Semua", high: "High Risk", medium: "Medium", low: "Low Risk" };
           const colors = {
-            all:    filterTab === tab ? "bg-blue-600 text-white"     : "bg-white text-gray-500 border border-gray-200 hover:border-blue-300 hover:text-blue-600",
+            all:    filterTab === tab ? "bg-slate-900 text-white"     : "bg-white text-gray-500 border border-gray-200 hover:border-slate-300 hover:text-slate-900",
             high:   filterTab === tab ? "bg-red-500 text-white"      : "bg-white text-red-500 border border-red-100 hover:border-red-300",
             medium: filterTab === tab ? "bg-amber-500 text-white"    : "bg-white text-amber-600 border border-amber-100 hover:border-amber-300",
             low:    filterTab === tab ? "bg-emerald-500 text-white"  : "bg-white text-emerald-600 border border-emerald-100 hover:border-emerald-300",
@@ -299,7 +299,7 @@ export function Predictions() {
             <thead className="border-b border-gray-100 bg-gray-50/50">
               <tr>
                 <th className={`${thCls} cursor-pointer hover:text-gray-600 w-[22%]`} onClick={() => handleSort("name")}>
-                  Karyawan <SortIcon col="name" />
+                  Employee <SortIcon col="name" />
                 </th>
                 <th className={`${thCls} cursor-pointer hover:text-gray-600 w-[20%]`} onClick={() => handleSort("riskProbability")}>
                   Risiko Resign <SortIcon col="riskProbability" />
@@ -312,7 +312,7 @@ export function Predictions() {
               {isLoading ? (
                 <tr>
                   <td colSpan={4} className="text-center py-16 text-gray-400 text-sm">
-                    Memuat data dari database…
+                    Memuat data of database…
                   </td>
                 </tr>
               ) : display.length === 0 ? (
@@ -363,8 +363,8 @@ export function Predictions() {
         </div>
         <div className="px-5 py-3.5 border-t border-gray-50 flex items-center justify-between flex-wrap gap-2">
           <p className="text-xs text-gray-400">
-            Menampilkan <span className="text-gray-500 font-medium">{display.length}</span> dari{" "}
-            <span className="text-gray-500 font-medium">{predictions.length}</span> karyawan
+            Showing <span className="text-gray-500 font-medium">{display.length}</span> of{" "}
+            <span className="text-gray-500 font-medium">{predictions.length}</span> employee
           </p>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-violet-400" />
