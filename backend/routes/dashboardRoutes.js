@@ -88,12 +88,14 @@ router.get('/karyawan/:id', async (req, res) => {
     // 1. Attendance Rate (Total hadir bulan ini vs asumsi 20 hari kerja)
     const now = new Date();
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     
     const { data: attendanceData, error: e1 } = await supabase
       .from('attendance')
       .select('date, clock_in_time, clock_out_time')
       .eq('employee_id', id)
-      .like('date', `${currentMonth}%`);
+      .gte('date', `${currentMonth}-01`)
+      .lte('date', `${currentMonth}-${String(lastDay).padStart(2, '0')}`);
     if (e1) throw e1;
 
     const daysPresent = attendanceData.length;
@@ -128,12 +130,22 @@ router.get('/karyawan/:id', async (req, res) => {
     });
     const leaveBalance = 12 - usedLeaves;
 
+    // 4. Employee Status
+    const { data: empData, error: eEmp } = await supabase
+      .from('employees')
+      .select('status')
+      .eq('id', id)
+      .single();
+    if (eEmp) throw eEmp;
+    const employeeStatus = empData ? empData.status : "Aktif";
+
     // Return aggregated data
     res.json({
       attendanceRate,
       daysPresent,
       hoursWorked,
       leaveBalance,
+      status: employeeStatus,
       // Dummy for now (as requested by user)
       tasksDone: 0,
       activeProjects: 0,

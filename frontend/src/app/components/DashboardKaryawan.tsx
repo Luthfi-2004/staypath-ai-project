@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Loader2, Calendar, Clock, Activity, CheckCircle, Folder, FileText, Briefcase } from "lucide-react";
+import { Loader2, Calendar, Clock, Activity, CheckCircle, Folder, FileText, Briefcase, Bell } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
@@ -10,7 +10,8 @@ export function DashboardEmployee({ onNavigate }: { onNavigate?: (path: string) 
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     attendanceRate: 0, daysPresent: 0, hoursWorked: 0, leaveBalance: 12,
-    tasksDone: 0, activeProjects: 0, upcomingTasks: [], recentActivities: []
+    tasksDone: 0, activeProjects: 0, upcomingTasks: [], recentActivities: [],
+    status: "Aktif"
   });
 
   useEffect(() => {
@@ -41,6 +42,20 @@ export function DashboardEmployee({ onNavigate }: { onNavigate?: (path: string) 
         <h1 className="text-2xl font-bold text-slate-800">Dashboard Overview</h1>
         <p className="text-slate-500 text-sm">Monitor your team performance and key metrics</p>
       </div>
+
+      {stats.status === "Scheduled" && (
+        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-start gap-4 shadow-sm animate-in fade-in slide-in-from-top-2">
+          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 flex-shrink-0">
+            <Bell size={20} />
+          </div>
+          <div>
+            <h3 className="text-blue-900 font-bold text-sm">Notifikasi Baru: Undangan Check-in</h3>
+            <p className="text-blue-700 text-sm mt-1 leading-relaxed">
+              Tim People & Culture (HR) ingin menjadwalkan sesi ngobrol santai (1-on-1 Check-in) dengan Anda. Tujuannya untuk berdiskusi mengenai pengalaman kerja dan wellbeing Anda. Silakan hubungi tim HR untuk menentukan waktu luang Anda minggu ini.
+            </p>
+          </div>
+        </div>
+      )}
 
       <h2 className="text-xl font-bold text-slate-800 mb-4">Welcome back, {employeeName}! 👋</h2>
       <p className="text-slate-500 text-sm mb-6">Here's your performance overview</p>
