@@ -224,6 +224,35 @@ const updateAIProfile = async (req, res) => {
   }
 };
 
+// ==========================================
+// 7. UPDATE: Profile & Password Settings
+// ==========================================
+const updateProfileSettings = async (req, res) => {
+  const { id } = req.params;
+  const { name, password } = req.body;
+  try {
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (password && password.trim()) updateData.password = password;
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: "Tidak ada data yang diubah" });
+    }
+
+    const { data, error } = await supabase
+      .from('employees')
+      .update(updateData)
+      .eq('id', id)
+      .select();
+
+    if (error) throw error;
+    res.json(data[0]);
+  } catch (err) {
+    console.error("Gagal update profil:", err.message);
+    res.status(500).json({ error: "Gagal update profil" });
+  }
+};
+
 // Jangan lupa update export-nya di bawah ini:
 module.exports = { 
   getEmployees, 
@@ -232,5 +261,6 @@ module.exports = {
   deleteEmployee, 
   updateEmployeeStatus,
   updateEmployeeTeam,
-  updateAIProfile
+  updateAIProfile,
+  updateProfileSettings
 };

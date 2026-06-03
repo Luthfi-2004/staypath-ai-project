@@ -7,7 +7,8 @@ const {
   deleteEmployee,
   updateEmployeeStatus,
   updateEmployeeTeam,
-  updateAIProfile
+  updateAIProfile,
+  updateProfileSettings
 } = require('../controllers/employeeController');
 
 // Daftar endpoint API karyawan
@@ -19,6 +20,7 @@ router.put('/:id', updateEmployee);
 router.patch('/:id/status', updateEmployeeStatus); 
 router.patch('/:id/team', updateEmployeeTeam); 
 router.put('/:id/ai-profile', updateAIProfile);
+router.patch('/:id/profile', updateProfileSettings);
 
 router.delete('/:id', deleteEmployee); 
 

@@ -109,14 +109,24 @@ export function SettingsPage() {
 
   const initials = name.split(" ").map((w) => w[0] ?? "").join("").slice(0, 2).toUpperCase() || "??";
 
-  const handleSaveProfile = () => {
-    if (saveProfile !== "idle") return;
+  const handleSaveProfile = async () => {
+    if (saveProfile !== "idle" || !name.trim()) return;
     setSaveProfile("saving");
-    localStorage.setItem("employee_name", name);
-    setTimeout(() => {
+    try {
+      const res = await fetch(`${API_URL}/api/employees/${employeeId}/profile`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      if (!res.ok) throw new Error();
+      localStorage.setItem("employee_name", name);
       setSaveProfile("saved");
+      // Memicu re-render pada header
+      window.dispatchEvent(new Event("storage"));
       setTimeout(() => setSaveProfile("idle"), 2000);
-    }, 600);
+    } catch {
+      setSaveProfile("idle");
+    }
   };
 
   const handleSavePass = async () => {
@@ -127,8 +137,8 @@ export function SettingsPage() {
 
     setSavePass("saving");
     try {
-      const res = await fetch(`${API_URL}/api/employees/${employeeId}`, {
-        method:  "PUT",
+      const res = await fetch(`${API_URL}/api/employees/${employeeId}/profile`, {
+        method:  "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: newPass }),
       });

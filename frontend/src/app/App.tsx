@@ -177,6 +177,14 @@ export default function App() {
     if (!role) navigate("/login");
   }, [role, navigate]);
 
+  useEffect(() => {
+    const handleStorage = () => {
+      setEmpName(localStorage.getItem("employee_name") || "User");
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
   const getPageFromPath = (): PageId => {
     const path = location.pathname;
     if (path.includes("/ourteams")) return "ourteams";
