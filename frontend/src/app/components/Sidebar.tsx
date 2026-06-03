@@ -45,6 +45,7 @@ const KARYAWAN_NAV_GROUPS = [
   {
     group: "Others",
     items: [
+      { id: "aisurvey", label: "AI Survey", icon: Activity, badge: "AI", badgeStyle: "bg-violet-500/15 text-violet-400" },
       { id: "settings", label: "Settings", icon: Settings, badge: null, badgeStyle: "" },
     ]
   }

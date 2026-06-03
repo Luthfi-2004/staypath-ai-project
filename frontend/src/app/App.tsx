@@ -5,6 +5,7 @@ import { DashboardPage } from "./components/DashboardPage";
 import { EmployeesPage } from "./components/EmployeesPage";
 import { Predictions } from "./components/Predictions";
 import { SettingsPage } from "./components/SettingsPage";
+import { AIProfileSurvey } from "./components/AIProfileSurvey";
 import { DashboardEmployee } from "./components/DashboardKaryawan";
 import { ClockInOut } from "./components/ClockInOut";
 import { MyAttendances } from "./components/MyAttendances";
@@ -19,7 +20,7 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type PageId = "dashboard" | "ourteams" | "employees" | "attendance" | "predictions" | "dailypulse" | "leaverequests" | "settings" | "clockinout" | "myattendances" | "myteam" | "projects" | "payroll" | "reports";
+type PageId = "dashboard" | "ourteams" | "employees" | "attendance" | "predictions" | "dailypulse" | "leaverequests" | "settings" | "clockinout" | "myattendances" | "myteam" | "projects" | "payroll" | "reports" | "aisurvey";
 type Role = "hrd" | "employee" | null;
 
 interface PageMeta {
@@ -43,6 +44,7 @@ const PAGE_META: Record<PageId, PageMeta> = {
   payroll: { title: "Payroll", subtitle: "Coming Soon", icon: FileText },
   reports: { title: "Reports", subtitle: "Coming Soon", icon: FileText },
   settings: { title: "Settings Profil", subtitle: "Akun & preferensi", icon: Settings },
+  aisurvey: { title: "AI Profile Survey", subtitle: "Preferensi AI dan beban kerja", icon: Cpu },
 };
 
 const HRD_ONLY: PageId[] = ["ourteams", "employees", "attendance", "predictions", "payroll", "reports"];
@@ -190,6 +192,7 @@ export default function App() {
     if (path.includes("/payroll")) return "payroll";
     if (path.includes("/reports")) return "reports";
     if (path.includes("/settings")) return "settings";
+    if (path.includes("/aisurvey")) return "aisurvey";
     return "dashboard";
   };
 
@@ -291,6 +294,7 @@ export default function App() {
                 {activePage === "myteam" && <MyTeam />}
                 {activePage === "projects" && <Projects />}
                 {activePage === "settings" && <SettingsPage />}
+                {activePage === "aisurvey" && <AIProfileSurvey />}
               </>
             ) : (
               <>

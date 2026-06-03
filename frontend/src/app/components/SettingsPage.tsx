@@ -1,6 +1,5 @@
 import { useState, useId } from "react";
 import { User, SlidersHorizontal, Check, Mail, UserCircle2, Lock, Loader2, Eye, EyeOff, Cpu } from "lucide-react";
-import { AIProfileSurvey } from "./AIProfileSurvey";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
@@ -270,20 +269,7 @@ export function SettingsPage() {
         </div>
       </Section>
 
-      {/* ── Profil AI (Khusus Employee) ── */}
-      {role === "employee" && (
-        <Section
-          icon={<Cpu size={18} className="text-slate-900" />}
-          title="AI Usage Profile"
-          description="Atur preferensi dan data pemakaian AI kamu"
-        >
-          {/* Karena AIProfileSurvey punya container dan title sendiri, kita re-use komponennya 
-              dengan menyembunyikan border/bayangan di CSS atau biarkan saja nested */}
-          <div className="-mx-8 -my-7">
-             <AIProfileSurvey />
-          </div>
-        </Section>
-      )}
+
 
       {/* ── Preferensi ── */}
       <Section
