@@ -653,6 +653,10 @@ export function EmployeesPage() {
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [toast, setToast] = useState<string | null>(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   // ── Fetch ──
   useEffect(() => {
     const load = async () => {
@@ -661,43 +665,47 @@ export function EmployeesPage() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        const mapped: EmployeeRecord[] = data.map((emp: any) => ({
-          id: emp.id,
-          employeeId: `${String(emp.id).padStart(3, "0")}`,
-          name: emp.name,
-          department: emp.department,
-          role: emp.role,
-          status: emp.status ?? "Active",
-          email:
-            emp.email ?? `${emp.name.split(" ")[0].toLowerCase()}@company.com`,
-          joinDate: resolveJoinDate(emp),
-          authRole: (emp.auth_role as AuthRole) ?? "employee",
+        const mapped: EmployeeRecord[] = data.map((emp: any) => {
+          let s = emp.status ?? "Active";
+          if (s === "Aktif") s = "Active"; // Normalize legacy database records
+          return {
+            id: emp.id,
+            employeeId: `${String(emp.id).padStart(3, "0")}`,
+            name: emp.name,
+            department: emp.department,
+            role: emp.role,
+            status: s,
+            email:
+              emp.email ?? `${emp.name.split(" ")[0].toLowerCase()}@company.com`,
+            joinDate: resolveJoinDate(emp),
+            authRole: (emp.auth_role as AuthRole) ?? "employee",
 
-          // AI Fields
-          education_level: emp.education_level,
-          country: emp.country,
-          industry: emp.industry,
-          company_size: emp.company_size,
-          remote_work_type: emp.remote_work_type,
-          primary_ai_tool: emp.primary_ai_tool,
-          ai_adoption_stage: emp.ai_adoption_stage,
-          fear_of_ai_replacement: emp.fear_of_ai_replacement,
-          productivity_score: emp.productivity_score,
-          burnout_score: emp.burnout_score,
-          years_experience: emp.years_experience,
-          team_size: emp.team_size,
-          salary_usd_k: emp.salary_usd_k,
-          ai_tools_used_per_day: emp.ai_tools_used_per_day,
-          hours_with_ai_assistance_daily: emp.hours_with_ai_assistance_daily,
-          ai_replaces_my_tasks_pct: emp.ai_replaces_my_tasks_pct,
-          weekly_ai_upskilling_hrs: emp.weekly_ai_upskilling_hrs,
-          job_satisfaction_1_5: emp.job_satisfaction_1_5,
-        }));
+            // AI Fields
+            education_level: emp.education_level,
+            country: emp.country,
+            industry: emp.industry,
+            company_size: emp.company_size,
+            remote_work_type: emp.remote_work_type,
+            primary_ai_tool: emp.primary_ai_tool,
+            ai_adoption_stage: emp.ai_adoption_stage,
+            fear_of_ai_replacement: emp.fear_of_ai_replacement,
+            productivity_score: emp.productivity_score,
+            burnout_score: emp.burnout_score,
+            years_experience: emp.years_experience,
+            team_size: emp.team_size,
+            salary_usd_k: emp.salary_usd_k,
+            ai_tools_used_per_day: emp.ai_tools_used_per_day,
+            hours_with_ai_assistance_daily: emp.hours_with_ai_assistance_daily,
+            ai_replaces_my_tasks_pct: emp.ai_replaces_my_tasks_pct,
+            weekly_ai_upskilling_hrs: emp.weekly_ai_upskilling_hrs,
+            job_satisfaction_1_5: emp.job_satisfaction_1_5,
+          };
+        });
 
         setRecords(mapped);
       } catch (err) {
         console.error("Gagal fetch employee:", err);
-        showToast("Gagal mengambil data of server.");
+        showToast("Gagal mengambil data dari server.");
       } finally {
         setIsLoading(false);
       }
@@ -727,6 +735,17 @@ export function EmployeesPage() {
       return matchSearch && matchStatus;
     }),
     sortKey, sortDir,
+  );
+
+  // Pagination logic
+  useEffect(() => {
+    setCurrentPage(1); // Reset to page 1 on filter/search change
+  }, [search, statusFilter, sortKey, sortDir]);
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginatedData = filtered.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   // ── CRUD ──
@@ -844,16 +863,16 @@ export function EmployeesPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-gray-900 font-semibold text-lg">Employee</h1>
+          <h1 className="text-gray-900 font-semibold text-lg">Employees</h1>
           <p className="text-gray-400 text-sm mt-0.5">
-            {records.length} total · {totalActive} aktif
+            {records.length} total · {totalActive} active
           </p>
         </div>
         <button
           onClick={() => setModal({ type: "add" })}
           className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
         >
-          <Plus size={15} /> Tambah Employee
+          <Plus size={15} /> Add Employee
         </button>
       </div>
 
@@ -880,7 +899,7 @@ export function EmployeesPage() {
                   : "bg-white border border-gray-200 text-gray-500 hover:border-slate-300 hover:text-slate-900"
                   }`}
               >
-                {s === "All" ? "Semua" : s}
+                {s === "All" ? "All" : s}
               </button>
             ),
           )}
@@ -903,19 +922,19 @@ export function EmployeesPage() {
                   className={`${thCls} cursor-pointer hover:text-gray-600`}
                   onClick={() => handleSort("name")}
                 >
-                  Nama <SortIcon col="name" />
+                  Name <SortIcon col="name" />
                 </th>
                 <th
                   className={`${thCls} cursor-pointer hover:text-gray-600`}
                   onClick={() => handleSort("department")}
                 >
-                  Departemen <SortIcon col="department" />
+                  Department <SortIcon col="department" />
                 </th>
                 <th
                   className={`${thCls} cursor-pointer hover:text-gray-600`}
                   onClick={() => handleSort("role")}
                 >
-                  Jabatan <SortIcon col="role" />
+                  Role <SortIcon col="role" />
                 </th>
                 <th
                   className={`${thCls} cursor-pointer hover:text-gray-600`}
@@ -923,8 +942,8 @@ export function EmployeesPage() {
                 >
                   Status <SortIcon col="status" />
                 </th>
-                <th className={thCls}>Akses</th>
-                <th className={`${thCls} text-right`}>Aksi</th>
+                <th className={thCls}>Access</th>
+                <th className={`${thCls} text-right`}>Actions</th>
               </tr>
             </thead>
 
@@ -935,13 +954,13 @@ export function EmployeesPage() {
                     colSpan={7}
                     className="text-center py-14 text-gray-400 text-sm"
                   >
-                    Memuat data of database…
+                    Loading data from database...
                   </td>
                 </tr>
               </tbody>
             ) : (
               <tbody className="divide-y divide-gray-50">
-                {filtered.map((emp, idx) => (
+                {paginatedData.map((emp, idx) => (
                   <tr
                     key={emp.id}
                     className="hover:bg-slate-100/30 transition-colors duration-100"
@@ -1011,24 +1030,48 @@ export function EmployeesPage() {
               <Search className="w-5 h-5 text-gray-400" />
             </div>
             <p className="text-gray-500 text-sm font-medium">
-              Tidak ada employee ditemukan
+              No employees found
             </p>
             <p className="text-gray-400 text-xs mt-1">
-              Coba ubah kata kunci atau filter status.
+              Try changing keywords or status filter.
             </p>
           </div>
         )}
 
         {!isLoading && filtered.length > 0 && (
           <div className="px-5 py-3 border-t border-gray-50 flex items-center justify-between">
-            <p className="text-xs text-gray-400">
-              Showing {filtered.length} of {records.length} employee
-            </p>
-            <p className="text-xs text-gray-400">
-              Diurutkan:{" "}
-              <span className="text-gray-500 font-medium">{sortKey}</span> (
-              {sortDir})
-            </p>
+            <div className="flex items-center gap-4">
+              <p className="text-xs text-gray-400">
+                Showing {paginatedData.length} of {filtered.length} employees
+              </p>
+              <p className="text-xs text-gray-400">
+                Sorted by:{" "}
+                <span className="text-gray-500 font-medium">{sortKey}</span> (
+                {sortDir})
+              </p>
+            </div>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1.5">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(p => p - 1)}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-500 hover:text-slate-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Prev
+                </button>
+                <span className="text-xs text-gray-500 font-medium px-2">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(p => p + 1)}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-500 hover:text-slate-900 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

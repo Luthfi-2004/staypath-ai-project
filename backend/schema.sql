@@ -33,7 +33,7 @@ CREATE TABLE employees (
     name TEXT NOT NULL,
     department TEXT,
     role TEXT,
-    status TEXT DEFAULT 'Aktif',
+    status TEXT DEFAULT 'Active',
     join_date DATE DEFAULT CURRENT_DATE,
     email TEXT,
     password TEXT,
@@ -164,6 +164,26 @@ VALUES ('Luthfi Rafananda Naufal', 'luthfi@staypath.com', 'luthfi123', 'karyawan
 -- Masukkan Karyawan 7 (Samuel Richard Gunawan - Full-Stack)
 INSERT INTO employees (name, email, password, auth_role, role, department, team_id, education_level, country, industry, company_size, remote_work_type, primary_ai_tool, ai_adoption_stage, fear_of_ai_replacement, productivity_score, burnout_score, years_experience, team_size, salary_usd_k, ai_tools_used_per_day, hours_with_ai_assistance_daily, ai_replaces_my_tasks_pct, weekly_ai_upskilling_hrs, job_satisfaction_1_5, attrition_risk, risk_score)
 VALUES ('Samuel Richard Gunawan', 'samuel@staypath.com', 'samuel123', 'karyawan', 'Full-Stack Web Developer', 'Engineering', 1, 'Bachelor', 'Indonesia', 'Technology', 'M', 'Remote', 'Gemini', 'Intermediate', 'Medium', 8.4, 4.5, 3.0, 6, 52.0, 3, 2.5, 20, 2.5, 4.5, 'Low Risk', 0.2314);
+
+-- Masukkan Karyawan 8 (Diana Rosiana - Product Manager)
+INSERT INTO employees (name, email, password, auth_role, role, department, team_id, education_level, country, industry, company_size, remote_work_type, primary_ai_tool, ai_adoption_stage, fear_of_ai_replacement, productivity_score, burnout_score, years_experience, team_size, salary_usd_k, ai_tools_used_per_day, hours_with_ai_assistance_daily, ai_replaces_my_tasks_pct, weekly_ai_upskilling_hrs, job_satisfaction_1_5, attrition_risk, risk_score)
+VALUES ('Diana Rosiana', 'diana@staypath.com', 'diana123', 'karyawan', 'Product Manager', 'Product', 1, 'Master', 'Indonesia', 'Technology', 'M', 'Hybrid', 'ChatGPT', 'Advanced', 'Low', 8.9, 5.0, 6.0, 6, 70.0, 3, 2.0, 15, 3.0, 4.0, 'Low Risk', 0.1543);
+
+-- Masukkan Karyawan 9 (Eko Prasetyo - QA Engineer)
+INSERT INTO employees (name, email, password, auth_role, role, department, team_id, education_level, country, industry, company_size, remote_work_type, primary_ai_tool, ai_adoption_stage, fear_of_ai_replacement, productivity_score, burnout_score, years_experience, team_size, salary_usd_k, ai_tools_used_per_day, hours_with_ai_assistance_daily, ai_replaces_my_tasks_pct, weekly_ai_upskilling_hrs, job_satisfaction_1_5, attrition_risk, risk_score)
+VALUES ('Eko Prasetyo', 'eko@staypath.com', 'eko123', 'karyawan', 'QA Engineer', 'Engineering', 1, 'Bachelor', 'Indonesia', 'Technology', 'M', 'On-site', 'None', 'Beginner', 'High', 6.5, 7.2, 3.0, 6, 40.0, 0, 0.0, 0, 0.5, 3.0, 'High Risk', 0.7654);
+
+-- Masukkan Karyawan 10 (Fahmi Ilmansyah - UI/UX Designer)
+INSERT INTO employees (name, email, password, auth_role, role, department, team_id, education_level, country, industry, company_size, remote_work_type, primary_ai_tool, ai_adoption_stage, fear_of_ai_replacement, productivity_score, burnout_score, years_experience, team_size, salary_usd_k, ai_tools_used_per_day, hours_with_ai_assistance_daily, ai_replaces_my_tasks_pct, weekly_ai_upskilling_hrs, job_satisfaction_1_5, attrition_risk, risk_score)
+VALUES ('Fahmi Ilmansyah', 'fahmi@staypath.com', 'fahmi123', 'karyawan', 'UI/UX Designer', 'Design', 1, 'Bachelor', 'Indonesia', 'Technology', 'M', 'Remote', 'Midjourney', 'Intermediate', 'Medium', 7.8, 4.5, 4.5, 6, 50.0, 2, 2.0, 20, 2.0, 4.1, 'Low Risk', 0.2841);
+
+-- Masukkan Karyawan 11 (Gita Wirjawan - Backend Developer)
+INSERT INTO employees (name, email, password, auth_role, role, department, team_id, education_level, country, industry, company_size, remote_work_type, primary_ai_tool, ai_adoption_stage, fear_of_ai_replacement, productivity_score, burnout_score, years_experience, team_size, salary_usd_k, ai_tools_used_per_day, hours_with_ai_assistance_daily, ai_replaces_my_tasks_pct, weekly_ai_upskilling_hrs, job_satisfaction_1_5, attrition_risk, risk_score)
+VALUES ('Gita Wirjawan', 'gita@staypath.com', 'gita123', 'karyawan', 'Backend Developer', 'Engineering', 1, 'Bachelor', 'Indonesia', 'Technology', 'M', 'Hybrid', 'Copilot', 'Advanced', 'Low', 8.2, 5.5, 5.0, 6, 55.0, 3, 3.0, 30, 3.5, 3.8, 'Medium Risk', 0.4412);
+
+-- Masukkan Karyawan 12 (Hani Mulyati - DevOps Engineer)
+INSERT INTO employees (name, email, password, auth_role, role, department, team_id, education_level, country, industry, company_size, remote_work_type, primary_ai_tool, ai_adoption_stage, fear_of_ai_replacement, productivity_score, burnout_score, years_experience, team_size, salary_usd_k, ai_tools_used_per_day, hours_with_ai_assistance_daily, ai_replaces_my_tasks_pct, weekly_ai_upskilling_hrs, job_satisfaction_1_5, attrition_risk, risk_score)
+VALUES ('Hani Mulyati', 'hani@staypath.com', 'hani123', 'karyawan', 'DevOps Engineer', 'Engineering', 1, 'Bachelor', 'Indonesia', 'Technology', 'M', 'Remote', 'ChatGPT', 'Intermediate', 'Low', 8.5, 4.8, 6.0, 6, 62.0, 2, 2.5, 25, 2.5, 4.2, 'Low Risk', 0.1982);
 
 -- 9. Update Lead ID untuk tim
 UPDATE teams SET lead_id = 'EMP-002' WHERE id = 1;

@@ -53,21 +53,25 @@ export function EmployeeTable() {
         const formatted: Employee[] = data
           .filter((emp: any) => {
             if (emp.status === 'Scheduled') intervenedIds.add(emp.id);
-            if (emp.attrition_risk === 'High' || emp.attrition_risk === 'Medium') return true;
+            const riskRaw = typeof emp.attrition_risk === 'string' ? emp.attrition_risk.replace(' Risk', '') : '';
+            if (riskRaw === 'High' || riskRaw === 'Medium') return true;
             if (!emp.attrition_risk && emp.burnout_score >= 6) return true;
             return false;
           })
-          .map((emp: any) => ({
-            id:         emp.id,
-            name:       emp.name,
-            department: emp.department,
-            role:       emp.role,
-            status:     emp.status,
-            avatar:     emp.name.substring(0, 2).toUpperCase(),
-            moodScore:  emp.job_satisfaction_1_5 ?? 3.0,
-            riskLevel: (emp.attrition_risk as RiskLevel)
-              ?? (emp.burnout_score >= 7 ? 'High' : emp.burnout_score >= 5 ? 'Medium' : 'Low'),
-          }));
+          .map((emp: any) => {
+            const riskRaw = typeof emp.attrition_risk === 'string' ? emp.attrition_risk.replace(' Risk', '') : null;
+            return {
+              id:         emp.id,
+              name:       emp.name,
+              department: emp.department,
+              role:       emp.role,
+              status:     emp.status,
+              avatar:     emp.name.substring(0, 2).toUpperCase(),
+              moodScore:  emp.job_satisfaction_1_5 ?? 3.0,
+              riskLevel: (riskRaw as RiskLevel)
+                ?? (emp.burnout_score >= 7 ? 'High' : emp.burnout_score >= 5 ? 'Medium' : 'Low'),
+            };
+          });
 
         setEmployees(formatted);
         setIntervened(intervenedIds);
