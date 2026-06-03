@@ -71,22 +71,22 @@ export function MyAttendances() {
       </div>
 
       {/* Banner */}
-      <div className="w-full h-32 md:h-40 bg-slate-900 rounded-3xl mb-6 relative overflow-hidden flex flex-col md:flex-row justify-between items-center p-8">
+      <div className="w-full h-auto min-h-[160px] md:h-40 bg-slate-900 rounded-3xl mb-6 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center p-6 md:p-8 gap-5 md:gap-0">
         <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop')] bg-cover bg-center"></div>
         <div className="relative z-10 flex items-center gap-4">
-          <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/20">
+          <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/20 shrink-0">
             <Calendar size={24} />
           </div>
           <div className="text-white">
             <h2 className="text-2xl font-bold">Attendance Overview</h2>
-            <p className="text-slate-300 text-sm hidden md:block">Track your daily presence and manage leave requests efficiently</p>
+            <p className="text-slate-300 text-sm hidden md:block mt-1">Track your daily presence and manage leave requests efficiently</p>
           </div>
         </div>
-        <div className="relative z-10 flex gap-3 mt-4 md:mt-0">
-          <button className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-sm font-medium backdrop-blur-md border border-white/20 transition flex items-center gap-2">
+        <div className="relative z-10 flex flex-wrap gap-3 w-full md:w-auto">
+          <button className="flex-1 md:flex-none justify-center bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-sm font-medium backdrop-blur-md border border-white/20 transition flex items-center gap-2">
             <Download size={16} /> Export
           </button>
-          <button onClick={() => setShowForm(!showForm)} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-lg shadow-slate-900/50">
+          <button onClick={() => setShowForm(!showForm)} className="flex-1 md:flex-none justify-center bg-white text-slate-900 hover:bg-slate-100 px-4 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-lg shadow-white/10">
             + Request Leave
           </button>
         </div>
@@ -199,8 +199,8 @@ export function MyAttendances() {
                         {lv.status}
                       </span>
                     </div>
-                    <div className="mt-3 pt-3 border-t border-slate-100 flex justify-between text-xs text-slate-500">
-                      <div className="flex items-center gap-2">
+                    <div className="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span>{new Date(lv.start_date).toLocaleDateString('en-US', {month:'short', day:'numeric'})} - {new Date(lv.end_date).toLocaleDateString('en-US', {month:'short', day:'numeric'})}</span>
                         <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
                           Total: {Math.ceil(Math.abs(new Date(lv.end_date).getTime() - new Date(lv.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1} Days
