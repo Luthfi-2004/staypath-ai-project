@@ -19,9 +19,10 @@ st.markdown("""
 
 @st.cache_data
 def load_data():
-    file_path = "ai_worker_burnout_attrition_2026.csv"
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(current_dir, "ai_worker_burnout_attrition_2026.csv")
     if not os.path.exists(file_path):
-        file_path = "dataset.csv"
+        file_path = os.path.join(current_dir, "dataset.csv")
     if not os.path.exists(file_path):
         return pd.DataFrame() # Fallback
     
